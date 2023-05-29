@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "qualia_gw"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+packages = [
+   { include = "src"}
+]
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+cython = "*"
+numpy = "*"
+matplotlib = "*"
+pandas = "*"
+scikit-learn = "*"
+POT = "*"
+jupyter = "*"
+scipy = "*"
+ipykernel = "^6.9.1"
+seaborn = "^0.11.2"
+pymysql = "^1.0.3"
+optuna = "^3.1.1"
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
