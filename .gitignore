@@ -1,3 +1,5 @@
 results
 .venv
 poetry.lock
+__pycache__/
+*.pyc
