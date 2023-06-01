@@ -146,9 +146,16 @@ class MainTraining():
 #%%
 if __name__ == "__main__":
     ### Set parameters
-    N_participant = 426 # max : 426
-    N_groups = 8
-    data_dir = "../data/color_neurotypical/numpy_data/"
+    N_groups = 2
+    
+    data = "atyp" # "neutyp" or "atyp"
+    
+    if data == "neutyp":
+        N_participant = 426
+        data_dir = "../data/color_neurotypical/numpy_data/"
+    elif data == "atyp":
+        N_participant = 207
+        data_dir = "../data/color_atypical/numpy_data/"
 
     participants_list = generate_random_grouping(N_participant=N_participant, 
                                                  N_groups=N_groups, 
@@ -192,79 +199,6 @@ if __name__ == "__main__":
                                    distance_metric = "euclidean")
 
         rearranged_color_embeddings_list.append(color_embeddings[reorder_idxs, :])
-    np.save(f"../results/rearranged_embeddings_list_Ngroup={N_groups}.npy", rearranged_color_embeddings_list)
-    #%%
-    rearranged_color_embeddings_list = np.load(f"../results/rearranged_embeddings_list_Ngroup={N_groups}.npy")
-    representation_list = []
-    for i in range(N_groups):
-        representation = Representation(name=f"Group{i+1}_neutyp", embedding=rearranged_color_embeddings_list[i], metric="euclidean")
-    
-        #vis_config = Visualization_Config()
-        #representation.show_sim_mat(returned="figure", visualization_config=vis_config)
-#
-        #vis_config_emb = Visualization_Config(color_labels=new_color_order)
-        #representation.show_embedding(dim=3, visualization_config=vis_config_emb)
-        
-        representation_list.append(representation)
-        
-    opt_config = Optimization_Config(data_name="color", 
-                                     init_plans_list=["random"],
-                                     num_trial=4,
-                                     n_iter=3, 
-                                     max_iter=200,
-                                     sampler_name="tpe", 
-                                     eps_list=[0.02, 0.2],
-                                     eps_log=True,
-                                     )
-    
-    alignment = Align_Representations(config=opt_config, 
-                                      representations_list=representation_list,
-                                      metric="euclidean",
-                                      )
-    
-    vis_config = Visualization_Config()
-    alignment.show_sim_mat(returned="row_data",
-                           visualization_config=vis_config,
-                           )
-    alignment.RSA_get_corr()
-    
-    # GW alignment
-    alignment.gw_alignment(results_dir="../results/gw alignment/",
-                           load_OT=True,
-                           returned="row_data",
-                           visualization_config=vis_config,
-                           show_log=False,
-                           fig_dir="../results/figs/",
-                           )
-    
-    #%%
-    ## Calculate the accuracy of the optimized OT matrix
-    alignment.calc_accuracy(top_k_list = [1, 3, 5], eval_type = "ot_plan")
-    alignment.plot_accuracy(eval_type = "ot_plan", scatter = True, fig_dir="../results/figs", fig_name = f"matching_rate_neutyp_Ngroup{N_groups}")
-    
-    #%%
-    #Plot embedding
-    vis_config_emb = Visualization_Config(color_labels=new_color_order,
-                                          marker_size=10)
-    alignment.visualize_embedding(dim = 3,
-                                  returned="figure",
-                                  visualization_config=vis_config_emb,
-                                  fig_dir="../results/figs",
-                                  fig_name = f"Aligned_embeddings_neutyp_Ngroup{N_groups}"
-                                  )
+    np.save(f"../results/rearranged_embeddings_list_{data}_Ngroup={N_groups}.npy", rearranged_color_embeddings_list)
 
-
-## %% check the prediction of the model
-#data_sim_list = []
-#model_sim_list = []
-#for i, pair in enumerate(X_np):
-#    data_sim = y_np[i]
-#    data_sim_list.append(data_sim)
-#    
-#    x1 = color_embeddings[pair[0],:]
-#    x2 = color_embeddings[pair[1],:]
-#    model_sim = np.linalg.norm(x1-x2)
-#    model_sim_list.append(model_sim)
-#    
-#df = pd.DataFrame(data={'data': data_sim_list, 'model': model_sim_list})
 # %%
