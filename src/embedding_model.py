@@ -133,7 +133,7 @@ class ModelTraining():
                     #l1 normalization
                     l1 = 0
                     for w in self.model.parameters():
-                        l1 += torch.sum(torch.abs(w))
+                        l1 = l1 +  torch.sum(torch.abs(w))
                     loss += + (lamb / size) * l1
                 
                 optimizer.zero_grad()
@@ -148,12 +148,16 @@ class ModelTraining():
         
         return running_loss, correct
     
-    def main_compute(self, loss_fn, lr, num_epochs, lamb = None, show_log = True):
+    def main_compute(self, loss_fn, lr, num_epochs, early_stopping=True, lamb = None, show_log = True):
         #loss_fn = nn.CrossEntropyLoss(reduction = "sum")
         optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
         
         training_loss = list()
         testing_loss = list()
+        
+        best_test_loss = float("inf")
+        early_stop_counter = 0
+        patience = 3
 
         for epoch in tqdm(range(num_epochs)):
             self.model.train()
@@ -163,18 +167,30 @@ class ModelTraining():
                 self.model.eval()
                 test_loss, test_correct = self.run_epoch_computation(self.valid_dataloader, loss_fn, optimizer, lamb)
             
+            if early_stopping:
+                if test_loss < best_test_loss:
+                    best_test_loss = test_loss
+                    early_stop_counter = 0
+                
+                else:
+                    early_stop_counter += 1
+                    if early_stop_counter >= patience:
+                        print("Early stopping triggered. Training stopped.")
+                        break
+                    
             if show_log: 
                 print('[%d/%5d] \ntrain loss: %.5f, accuracy: %.2f \ntest loss: %.5f, accuracy: %.2f' % (epoch + 1, num_epochs, train_loss, train_correct * 100, test_loss, test_correct * 100))
                 training_loss.append(train_loss)
                 testing_loss.append(test_loss)
         
-        plt.close()
-        plt.figure()
-        plt.subplot(211)
-        plt.plot(training_loss)
-        plt.subplot(212)
-        plt.plot(testing_loss)
-        plt.show()
+        if show_log:
+            plt.close()
+            plt.figure()
+            plt.subplot(211)
+            plt.plot(training_loss)
+            plt.subplot(212)
+            plt.plot(testing_loss)
+            plt.show()
         
         return test_loss, test_correct
     
