@@ -44,15 +44,15 @@ if __name__ == "__main__":
     ### cv params
     n_splits = 5
     lamb_range = [1e-2, 1e+3]
-    cv_n_trial = 5
+    cv_n_trial = 1
                     
                     
-    data_list = ["atyp"]#"neutyp", 
+    data_list = ["neutyp"]#, "atyp"
     N_trials = 76
     
-    Z_list = [20, 60, 100] # number of atyp sub 
+    Z_list = [100] # number of atyp sub 20, 60, 
     
-    N_sample = 30 # number of sampling
+    N_sample = 1 # number of sampling
     seed_list = range(N_sample)
     
     #%%
