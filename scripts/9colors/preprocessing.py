@@ -42,5 +42,7 @@ for i in range(n_sub):
         sim = row[2]
         similarity_matrix[color_1, color_2] = sim
     
+    # make them symmetric
+    similarity_matrix = (similarity_matrix + similarity_matrix.T)/2
     np.save(f"../../data/9colors/similarity_matrix_sub{i+1}.npy", similarity_matrix)
 # %%
