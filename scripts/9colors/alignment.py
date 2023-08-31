@@ -14,15 +14,18 @@ from GW_methods.src.align_representations import Representation, AlignRepresenta
 representations = list()
 
 # select data : "simulation", "AllenBrain", "THINGS", "DNN", "color"
-data_select = "9colors"
+regularization = True
+reg_str = "reg_" if regularization else ""
+
+data_select = f"{reg_str}9colors"
 
 #%%
 n_representations = 14 # Set the number of the instanses of "Representation". This number must be equal to or less than the number of the groups. 2 is the maximum for this data.
 metric = "euclidean" # Please set the metric that can be used in "scipy.spatical.distance.cdist()".
 
-for i in [0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13]:
+for i in range(n_representations):#[0, 1, 2, 3, 4, 8, 9, 10, 11, 12, 13]:
     name = f"Sub{i+1}" # the name of the representation
-    sim_mat = np.load(f"../../data/9colors/similarity_matrix_sub{i+1}.npy") # the dissimilarity matrix will be computed with this embedding based on the metric
+    sim_mat = np.load(f"../../data/9colors/{reg_str}similarity_matrix_sub{i+1}.npy") # the dissimilarity matrix will be computed with this embedding based on the metric
     
     representation = Representation(
         name=name,
@@ -141,7 +144,8 @@ align_representation.gw_alignment(
     return_figure = False,
     OT_format = sim_mat_format,
     visualization_config = visualize_config,
-    fig_dir="../../results/figs/9colors/"
+    fig_dir="../../results/figs/9colors/",
+    save_dataframe=True
 )
 # %%
 align_representation.show_optimization_log(
@@ -170,3 +174,10 @@ align_representation.plot_accuracy(
     fig_dir="../../results/figs/9colors/",
     fig_name="accuracy_k_nearest.png"
 )
+
+
+
+#%%
+df_RSA_corr = align_representation.RSA_corr
+np.save("../../results/gw_alignment/9colors/RSA_corr.npy", df_RSA_corr)
+# %%

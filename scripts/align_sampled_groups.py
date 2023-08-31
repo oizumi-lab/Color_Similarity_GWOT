@@ -28,10 +28,13 @@ from src.embedding_model import EmbeddingModel, ModelTraining
 from GW_methods.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
 
 #%%
-data_list = ["neutyp", "atyp" , "n-a"]#
-Z_list = [100]# 20, 60, 
+compute_OT = False
+
+data_list = ["neutyp", "atyp"]# , "n-a" 
+N_groups_list = [2, 2] # number of groups for each data type4, 
+Z_list = [128]# 20, 60, # number of participants
 N_sample = 1 # number of sampling
-N_trials = 76
+N_trials = 75
 
 # load color codes
 old_color_order = list(np.load('../data/hex_code/original_color_order.npy'))
@@ -41,9 +44,8 @@ reorder_idxs = get_reorder_idxs(old_color_order,new_color_order)
 
 #%%
 for Z in Z_list:
-    for data in data_list:  
-        
-        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+    for data, N_groups in zip(data_list, N_groups_list):  
+        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy")
         
         ### set accuracy dataframe
         top_k_list = [1, 3, 5]
@@ -55,15 +57,16 @@ for Z in Z_list:
         
         ### alignment 
         for i, embeddings_pair in enumerate(embeddings_pairs_list):
-            group1 = Representation(name=f"Group1 seed={i}", embedding=embeddings_pair[0][reorder_idxs, :], metric="euclidean")
-            group2 = Representation(name=f"Group2 seed={i}", embedding=embeddings_pair[1][reorder_idxs, :], metric="euclidean")
+            
+            representations = []
+            for j, embedding in enumerate(embeddings_pair):
+                representation = Representation(name=f"{data}-{j+1}", embedding=embedding[reorder_idxs, :], metric="euclidean")
+                representations.append(representation)
 
-            representation_list = [group1, group2]
-
-            opt_config = OptimizationConfig(data_name=f"color {data} Z={Z} Ntrials={N_trials}", 
+            opt_config = OptimizationConfig(
                                     init_mat_plan="random",
                                     db_params={"drivername": "sqlite"},
-                                    num_trial=100,
+                                    num_trial=200,
                                     n_iter=2, 
                                     max_iter=200,
                                     sampler_name="tpe", 
@@ -72,8 +75,10 @@ for Z in Z_list:
                                     )
             
             alignment = AlignRepresentations(config=opt_config, 
-                                    representations_list=representation_list,
+                                    representations_list=representations,
                                     metric="euclidean",
+                                    main_results_dir="../results/gw_alignment/",
+                                    data_name=f"color_{data}_Z={Z}_Ntrials={N_trials}_seed{i}", 
                                     )
             
             vis_config = VisualizationConfig(
@@ -90,19 +95,18 @@ for Z in Z_list:
                 )
             alignment.RSA_get_corr()
             
-            alignment.gw_alignment(results_dir="../results/gw alignment/",
-                        compute_OT=False,
+            alignment.gw_alignment(
+                        compute_OT=compute_OT,
                         delete_results=False,
                         visualization_config=vis_config,
-                        fig_dir="../results/figs/"
+                        fig_dir=f"../results/figs/{data}"
                         )
             
             vis_emb = VisualizationConfig(
                 figsize=(8, 8), 
                 legend_size=12,
                 marker_size=60,
-                color_labels=new_color_order,
-                markers_list=["o", "^"]
+                color_labels=new_color_order
                 )
             alignment.visualize_embedding(dim=3, visualization_config=vis_emb, fig_dir=f"../results/figs/{data}", fig_name=f"{data}_Aligned_embedings.svg")
             
@@ -112,6 +116,9 @@ for Z in Z_list:
             ## Calculate the accuracy based on k-nearest neighbors
             alignment.calc_accuracy(top_k_list=top_k_list, eval_type="k_nearest")
 
+            alignment.plot_accuracy(eval_type="ot_plan", fig_dir=f"../results/figs/{data}/", fig_name="accuracy_ot_plan.png")
+            alignment.plot_accuracy(eval_type="k_nearest", fig_dir=f"../results/figs/{data}/", fig_name="accuracy_k_nearest.png")
+            
             top_k_accuracy = pd.merge(top_k_accuracy, alignment.top_k_accuracy, on="top_n")
             k_nearest_matching_rate = pd.merge(k_nearest_matching_rate, alignment.k_nearest_matching_rate, on="top_n")
             

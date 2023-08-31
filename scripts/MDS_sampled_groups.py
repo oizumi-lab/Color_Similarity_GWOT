@@ -16,11 +16,12 @@ def sample_participants(N, Z, seed):
     participants_list = random.sample(range(N), Z)
     return participants_list
 
-def split_lists(list): 
-    N = len(list) // 2
-    list1 = list[:N]
-    list2 = list[N:]
-    result = [list1, list2]
+def split_lists(list, n_groups): 
+    N = len(list) // n_groups
+    result = []
+    for i in range(n_groups):
+        list_i = list[N*i : N*(i+1)]
+        result.append(list_i)
     return result
 
 #%%
@@ -47,10 +48,11 @@ if __name__ == "__main__":
     cv_n_trial = 1
                     
                     
-    data_list = ["neutyp"]#, "atyp"
-    N_trials = 76
+    data_list = ["neutyp"]#"atyp", "atyp"
+    N_trials = 75
     
-    Z_list = [100] # number of atyp sub 20, 60, 
+    Z_list = [128] # number of participants per group
+    N_groups = 2
     
     N_sample = 1 # number of sampling
     seed_list = range(N_sample)
@@ -64,7 +66,7 @@ if __name__ == "__main__":
                 data_dir = "../data/color_neurotypical/numpy_data/"
         
             elif data == "atyp":
-                N_participant = 207
+                N_participant = 257
                 data_dir = "../data/color_atypical/numpy_data/"
             
             # load color codes
@@ -77,8 +79,8 @@ if __name__ == "__main__":
             ### set participants list
             group_pairs_list = []
             for seed in seed_list:
-                sampled_participants = sample_participants(N=N_participant, Z=Z*2, seed=seed)
-                group_pair = split_lists(sampled_participants)
+                sampled_participants = sample_participants(N=N_participant, Z=Z*N_groups, seed=seed)
+                group_pair = split_lists(sampled_participants, N_groups)
                 group_pairs_list.append(group_pair)
                 
             
@@ -130,18 +132,20 @@ if __name__ == "__main__":
         
                 embeddings_pairs_list.append(embeddings_pair)
                 
-            np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+            np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
             
     #%%
     ### set n-a embedding pairs
+    N_groups_N = 4
+    N_groups_A = 2
     for Z in Z_list:
-        embeddings_pairs_list_N = np.load(f"../results/embeddings_pairs_list_neutyp_Z={Z}_Ntrials={N_trials}_Nsample={N_sample}.npy")
-        embeddings_pairs_list_A = np.load(f"../results/embeddings_pairs_list_atyp_Z={Z}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list_N = np.load(f"../results/embeddings_pairs_list_neutyp_Z={Z}_Ngroups={N_groups_N}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list_A = np.load(f"../results/embeddings_pairs_list_atyp_Z={Z}_Ngroups={N_groups_A}_Ntrials={N_trials}_Nsample={N_sample}.npy")
 
         embeddings_pairs_list = []
         for i in range(N_sample):
             embeddings_pair = [embeddings_pairs_list_N[i][0], embeddings_pairs_list_A[i][0]]
             embeddings_pairs_list.append(embeddings_pair)
 
-        np.save(f"../results/embeddings_pairs_list_n-a_Z={Z}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+        np.save(f"../results/embeddings_pairs_list_n-a_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
 # %%

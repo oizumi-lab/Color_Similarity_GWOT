@@ -12,6 +12,7 @@ data_path = "../../data/9colors/"
 
 n_sub = 14
 
+#%%
 similarity_data = pd.DataFrame(columns=["Color_1", "Color_2", "similarity"])
 for i in range(n_sub):
     if i < 9:
@@ -45,4 +46,22 @@ for i in range(n_sub):
     # make them symmetric
     similarity_matrix = (similarity_matrix + similarity_matrix.T)/2
     np.save(f"../../data/9colors/similarity_matrix_sub{i+1}.npy", similarity_matrix)
+# %%
+
+### regularization
+means = 0
+for i in range(n_sub):
+    mat = np.load(f"../../data/9colors/similarity_matrix_sub{i+1}.npy")
+    
+    mean = np.mean(mat)
+    means += mean
+    
+means /= n_sub
+
+for i in range(n_sub):
+    mat = np.load(f"../../data/9colors/similarity_matrix_sub{i+1}.npy")
+    
+    mat /= means
+    
+    np.save(f"../../data/9colors/reg_similarity_matrix_sub{i+1}.npy", mat)
 # %%

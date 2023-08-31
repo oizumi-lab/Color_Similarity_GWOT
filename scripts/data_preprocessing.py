@@ -7,13 +7,12 @@ Genji Kawakita
 import numpy as np
 import os
 import pandas as pd
-from src.preprocess_utils import *
-from src.utils import *
+from src.utils.preprocess_utils import make_participant_idx_dict, rename_participant_files, save_renamed_files_as_npy
 
 
 # %% Load data
 neurotypical_dir = '../data/color_neurotypical/participant_matrices'
-atypical_dir = '../data/color_atypical/participant_matrices'
+atypical_dir = '../data/color_atypical/new_participant_matrices'
 
 # extract participants data
 nt_file_list = os.listdir(neurotypical_dir)
