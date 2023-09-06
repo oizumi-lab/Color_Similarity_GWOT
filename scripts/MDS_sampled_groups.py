@@ -7,7 +7,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from color_embedding_MDS import MakeDataset, MainTraining, KFoldCV
+from src.color_embedding_MDS import MakeDataset, MainTraining, KFoldCV
 from src.utils.utils import get_reorder_idxs
 
 #%%
