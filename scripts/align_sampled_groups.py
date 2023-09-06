@@ -30,8 +30,8 @@ from GW_methods.src.align_representations import Representation, VisualizationCo
 #%%
 compute_OT = False
 
-data_list = ["n-a" ]# , "neutyp", "atyp"
-N_groups_list = [2, 2] # number of groups for each data type4, 
+data_list = ["neutyp", "atyp", "n-a"]# "neutyp" : n-n, "atyp" : a-a
+N_groups_list = [2, 2, 2] # number of groups for each data type4, 
 Z_list = [128]# 20, 60, # number of participants
 N_sample = 1 # number of sampling
 N_trials = 75
