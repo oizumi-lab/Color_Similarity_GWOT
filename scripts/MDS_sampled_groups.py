@@ -136,7 +136,7 @@ if __name__ == "__main__":
             
     #%%
     ### set n-a embedding pairs
-    N_groups_N = 4
+    N_groups_N = 2
     N_groups_A = 2
     for Z in Z_list:
         embeddings_pairs_list_N = np.load(f"../results/embeddings_pairs_list_neutyp_Z={Z}_Ngroups={N_groups_N}_Ntrials={N_trials}_Nsample={N_sample}.npy")
