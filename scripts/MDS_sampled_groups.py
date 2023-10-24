@@ -44,17 +44,17 @@ if __name__ == "__main__":
     
     ### cv params
     n_splits = 5
-    lamb_range = [1e-2, 1e+3]
-    cv_n_trial = 1
+    lamb_range = [5e-3, 5e-2]
+    cv_n_trial = 10
                     
     ### params
-    data_list = ["neutyp", "atyp"]#"atyp", 
+    data_list = ["neutyp"]#"atyp", , "atyp"
     N_trials = 75
     
-    Z_list = [100] # number of participants per group #[10, 50, 100]
+    Z_list = [128] # number of participants per group #[10, 50, 100]
     N_groups = 2 # fix
     
-    N_sample = 20 # number of sampling
+    N_sample = 1 # number of sampling
     seed_list = range(N_sample)
     
     #%%
@@ -92,7 +92,8 @@ if __name__ == "__main__":
                 for j, participants_list in enumerate(group_pair):
                     dataset = MakeDataset(participants_list=participants_list, data_dir=data_dir)
                     
-                    study_name = f"{data} Z={Z} seed={i} group{j+1}"
+                    study_name = f"{data}_emb={emb_dim}_Z={Z}_seed={i}_group{j+1}_earlystop={early_stopping}"
+                    #study_name = f"{data} Z={Z} seed={i} group{j+1}"
                     
                     ### cross validation
                     cv = KFoldCV(dataset=dataset(),
@@ -110,8 +111,10 @@ if __name__ == "__main__":
                                  early_stopping=early_stopping,
                                  distance_metric="euclidean")
 
-                    cv.optimize(n_trials=cv_n_trial)
-                    lamb = cv.get_best_lamb(show_log=True)
+                    #cv.optimize(n_trials=cv_n_trial)
+                    #lamb = cv.get_best_lamb(show_log=True)
+                    #print(lamb)
+                    lamb = None
                     
                     ### main
                     main_training = MainTraining(dataset = dataset(N_trials=N_trials), 
@@ -132,8 +135,8 @@ if __name__ == "__main__":
         
                 embeddings_pairs_list.append(embeddings_pair)
                 
-            np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
-            
+            #np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+            np.save(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
     #%%
     ### set n-a embedding pairs
     N_groups_N = 2

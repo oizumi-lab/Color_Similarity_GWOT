@@ -84,7 +84,7 @@ for Z in Z_list:
             vis_config = VisualizationConfig(
                 figsize=(8, 6), 
                 title_size = 15, 
-                cmap = "rocket",
+                cmap = "rocket_r",
                 cbar_ticks_size=10,
                 )
             

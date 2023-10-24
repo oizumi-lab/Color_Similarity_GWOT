@@ -163,7 +163,7 @@ class MainTraining():
                                                 num_epochs=n_epoch, 
                                                 early_stopping=early_stopping,
                                                 lamb=lamb, 
-                                                show_log=False)
+                                                show_log=True)
         
         weights = model.state_dict()["Embedding.weight"].to('cpu').detach().numpy().copy()
         
@@ -275,7 +275,7 @@ if __name__ == "__main__":
         N_participant = 426
         data_dir = "../data/color_neurotypical/numpy_data/"
     elif data == "atyp":
-        N_participant = 207
+        N_participant = 257
         data_dir = "../data/color_atypical/numpy_data/"
 
     participants_list = generate_random_grouping(N_participant=N_participant, 
@@ -365,28 +365,27 @@ if __name__ == "__main__":
 #plt.hist(np.max(np.abs(embeddings), axis=0))
 #plt.show()
 # %%
-## Load the data file
-#num_response = []
-#for i in range(207):
-#    data_dir = "../data/color_neurotypical/numpy_data/"
-#    filepath = f"participant_{i}.npy"
-#    data = np.load(data_dir + filepath, allow_pickle=True)
-#    data = data.astype(np.float64)
-#
-#    # Get lower triangle indices where data is not NaN
-#    lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
-#    values = data[lower_triangle_indices]
-#    non_nan_indices = np.where(~np.isnan(values))
-#
-#    # Get final indices and values
-#    final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
-#    final_values = values[non_nan_indices]
-#
-#    X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
-#    y = list(final_values)
-#    
-#    print(max(y))
-#    #num_response.append(len(X))
-## %%
-#max(num_response)
+# Load the data file
+num_response = []
+for i in range(257):
+    data_dir = "../data/color_atypical/numpy_data/"
+    filepath = f"participant_{i}.npy"
+    data = np.load(data_dir + filepath, allow_pickle=True)
+    data = data.astype(np.float64)
+
+    # Get lower triangle indices where data is not NaN
+    lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
+    values = data[lower_triangle_indices]
+    non_nan_indices = np.where(~np.isnan(values))
+
+    # Get final indices and values
+    final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
+    final_values = values[non_nan_indices]
+
+    X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
+    y = list(final_values)
+    
+    num_response.append(len(y))
+# %%
+min(num_response)
 # %%
