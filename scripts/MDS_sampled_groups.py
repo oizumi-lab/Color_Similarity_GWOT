@@ -51,10 +51,10 @@ if __name__ == "__main__":
     data_list = ["neutyp", "atyp"]#"atyp", 
     N_trials = 75
     
-    Z_list = [100] # number of participants per group #[10, 50, 100]
+    Z_list = [128] # number of participants per group #[10, 50, 100]
     N_groups = 2 # fix
     
-    N_sample = 20 # number of sampling
+    N_sample = 1 # number of sampling
     seed_list = range(N_sample)
     
     #%%

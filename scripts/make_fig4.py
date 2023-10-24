@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import pearsonr
 from src.utils import *
-from src.preprocess_utils import *
-from src.plot_utils import *
-from src.analysis_utils import *
+from src.utils.preprocess_utils import *
+from src.utils.plot_utils import *
+from src.utils.analysis_utils import *
 
 # %% load data
 # load color-atypical data
