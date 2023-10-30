@@ -11,6 +11,7 @@ from sklearn.manifold import MDS
 from sklearn.decomposition import PCA
 import itertools
 import optuna
+from optuna.storages import RDBStorage
 
 #from src.preprocess_utils import *
 from src.utils.utils import get_reorder_idxs
@@ -21,6 +22,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset, random_split, Subset
 from sklearn.model_selection import train_test_split, KFold
+
+from joblib import Parallel, delayed
 
 import ot
 from sklearn.metrics import pairwise_distances
@@ -163,7 +166,7 @@ class MainTraining():
                                                 num_epochs=n_epoch, 
                                                 early_stopping=early_stopping,
                                                 lamb=lamb, 
-                                                show_log=False)
+                                                show_log=True)
         
         weights = model.state_dict()["Embedding.weight"].to('cpu').detach().numpy().copy()
         
@@ -189,6 +192,7 @@ class KFoldCV():
                      ) -> None:
         
         self.dataset = dataset
+        self.full_data = [data for data in self.dataset]
         self.n_splits = n_splits
         self.search_space = search_space
         
@@ -196,7 +200,15 @@ class KFoldCV():
         self.save_dir = results_dir + "/" + study_name
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
-        self.storage = "sqlite:///" + self.save_dir + "/" + study_name + ".db"
+        
+        #self.storage = "sqlite:///" + self.save_dir + "/" + study_name + ".db"
+        self.storage = RDBStorage(
+            "sqlite:///" + self.save_dir + "/" + study_name + ".db",
+            engine_kwargs={"pool_size": 5, "max_overflow": 10},
+            #retry_interval_seconds=1,
+            #retry_limit=3,
+            #retry_deadline=60
+            )
         
         self.batch_size = batch_size
         self.device = device
@@ -208,6 +220,41 @@ class KFoldCV():
         self.early_stopping = early_stopping
         self.distance_metric = distance_metric
         
+    #def training_for_one_split(self, train_indices, val_indices, lamb):
+    #    
+    #    train_dataset = [self.full_data[i] for i in train_indices]
+    #    valid_dataset = [self.full_data[i] for i in val_indices]
+    #    valid_dataloader = DataLoader(valid_dataset, self.batch_size, shuffle = False)
+    #    train_dataloader = DataLoader(train_dataset, self.batch_size, shuffle = True)
+    #    
+    #    model = EmbeddingModel(emb_dim = self.emb_dim, object_num = self.object_num).to(self.device)
+    #
+    #    model_training = ModelTraining(self.device, 
+    #                                model = model, 
+    #                                train_dataloader = train_dataloader, 
+    #                                valid_dataloader = valid_dataloader, 
+    #                                similarity = "pairwise", 
+    #                                distance_metric = self.distance_metric)
+    #
+    #    loss, test_correct = model_training.main_compute(loss_fn=self.loss_fn, 
+    #                                        lr=self.lr, 
+    #                                        num_epochs=self.n_epoch, 
+    #                                        early_stopping=self.early_stopping,
+    #                                        lamb=lamb, 
+    #                                        show_log=False)
+    #    
+    #    return loss
+    #
+    #def training(self, trial):
+    #    kf = KFold(n_splits=self.n_splits, shuffle=True)
+    #    
+    #    lamb = trial.suggest_float("lamb", self.search_space[0], self.search_space[1], log=True)
+    #    
+    #    cv_losses = Parallel(n_jobs=-1)(delayed(self.training_for_one_split)(train_idx, val_idx, lamb) for train_idx, val_idx in kf.split(self.full_data))
+    #    
+    #    avg_cv_loss = sum(cv_losses) / len(cv_losses)
+    #    
+    #    return avg_cv_loss
         
     def training(self, trial):
         lamb = trial.suggest_float("lamb", self.search_space[0], self.search_space[1], log=True)
@@ -216,8 +263,10 @@ class KFoldCV():
         
         cv_loss = 0
         for train_indices, val_indices in kf.split(self.dataset):
-            train_dataset = Subset(self.dataset, train_indices)
-            valid_dataset = Subset(self.dataset, val_indices)
+            #train_dataset = Subset(self.dataset, train_indices)
+            #valid_dataset = Subset(self.dataset, val_indices)
+            train_dataset = [self.full_data[i] for i in train_indices]
+            valid_dataset = [self.full_data[i] for i in val_indices]
             valid_dataloader = DataLoader(valid_dataset, self.batch_size, shuffle = False)
             train_dataloader = DataLoader(train_dataset, self.batch_size, shuffle = True)
             
@@ -275,7 +324,7 @@ if __name__ == "__main__":
         N_participant = 426
         data_dir = "../data/color_neurotypical/numpy_data/"
     elif data == "atyp":
-        N_participant = 207
+        N_participant = 257
         data_dir = "../data/color_atypical/numpy_data/"
 
     participants_list = generate_random_grouping(N_participant=N_participant, 
@@ -365,28 +414,27 @@ if __name__ == "__main__":
 #plt.hist(np.max(np.abs(embeddings), axis=0))
 #plt.show()
 # %%
-## Load the data file
-#num_response = []
-#for i in range(207):
-#    data_dir = "../data/color_neurotypical/numpy_data/"
-#    filepath = f"participant_{i}.npy"
-#    data = np.load(data_dir + filepath, allow_pickle=True)
-#    data = data.astype(np.float64)
-#
-#    # Get lower triangle indices where data is not NaN
-#    lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
-#    values = data[lower_triangle_indices]
-#    non_nan_indices = np.where(~np.isnan(values))
-#
-#    # Get final indices and values
-#    final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
-#    final_values = values[non_nan_indices]
-#
-#    X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
-#    y = list(final_values)
-#    
-#    print(max(y))
-#    #num_response.append(len(X))
-## %%
-#max(num_response)
+# Load the data file
+num_response = []
+for i in range(257):
+    data_dir = "../data/color_atypical/numpy_data/"
+    filepath = f"participant_{i}.npy"
+    data = np.load(data_dir + filepath, allow_pickle=True)
+    data = data.astype(np.float64)
+
+    # Get lower triangle indices where data is not NaN
+    lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
+    values = data[lower_triangle_indices]
+    non_nan_indices = np.where(~np.isnan(values))
+
+    # Get final indices and values
+    final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
+    final_values = values[non_nan_indices]
+
+    X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
+    y = list(final_values)
+    
+    num_response.append(len(y))
+# %%
+min(num_response)
 # %%
