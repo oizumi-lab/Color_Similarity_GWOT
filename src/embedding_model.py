@@ -133,8 +133,8 @@ class ModelTraining():
                     #l1 normalization
                     l1 = 0
                     for w in self.model.parameters():
-                        l1 = l1 +  torch.sum(torch.abs(w))
-                    loss += + (lamb / size) * l1
+                        l1 += torch.sum(torch.abs(w))
+                    loss += lamb * l1
                 
                 optimizer.zero_grad()
                 loss.backward()
@@ -157,7 +157,7 @@ class ModelTraining():
         
         best_test_loss = float("inf")
         early_stop_counter = 0
-        patience = 3
+        patience = 5
 
         for epoch in tqdm(range(num_epochs)):
             self.model.train()

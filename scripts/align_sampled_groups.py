@@ -28,13 +28,14 @@ from src.embedding_model import EmbeddingModel, ModelTraining
 from GW_methods.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
 
 #%%
-compute_OT = False
+compute_OT = True
 
-data_list = ["neutyp", "atyp", "n-a"]# "neutyp" : n-n, "atyp" : a-a
-N_groups_list = [2, 2, 2] # number of groups for each data type4, 
+data_list = ["atyp", "n-a"]# "neutyp" : n-n, "atyp" : a-a, "neutyp"
+N_groups_list = [2, 2] # number of groups for each data type4, , 2, 2
 Z_list = [128]# 20, 60, # number of participants
-N_sample = 1 # number of sampling
+N_sample = 20 # number of sampling
 N_trials = 75
+emb_dim = 20
 
 # load color codes
 old_color_order = list(np.load('../data/hex_code/original_color_order.npy'))
@@ -45,7 +46,7 @@ reorder_idxs = get_reorder_idxs(old_color_order,new_color_order)
 #%%
 for Z in Z_list:
     for data, N_groups in zip(data_list, N_groups_list):  
-        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy")
         
         ### set accuracy dataframe
         top_k_list = [1, 3, 5]
@@ -66,8 +67,8 @@ for Z in Z_list:
             opt_config = OptimizationConfig(
                                     init_mat_plan="random",
                                     db_params={"drivername": "sqlite"},
-                                    num_trial=200,
-                                    n_iter=2, 
+                                    num_trial=100,
+                                    n_iter=1, 
                                     max_iter=200,
                                     sampler_name="tpe", 
                                     eps_list=[0.02, 0.2],
@@ -84,7 +85,7 @@ for Z in Z_list:
             vis_config = VisualizationConfig(
                 figsize=(8, 6), 
                 title_size = 15, 
-                cmap = "rocket",
+                cmap = "gray",
                 cbar_ticks_size=10,
                 )
             
@@ -125,4 +126,6 @@ for Z in Z_list:
         top_k_accuracy.to_csv(f"../results/top_k_accuracy_{data}_Z={Z}_Nsample={N_sample}.csv")
         k_nearest_matching_rate.to_csv(f"../results/k_nearest_matching_rate_{data}_Z={Z}_Nsample={N_sample}.csv")
 # %%
+print("finished")
 
+# %%

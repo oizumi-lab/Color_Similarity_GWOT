@@ -28,10 +28,10 @@ def split_lists(list, n_groups):
 if __name__ == "__main__": 
     ### set parameters
     # device 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cuda:3" if torch.cuda.is_available() else "cpu"
 
     # Train the model
-    emb_dim = 5
+    emb_dim = 20
     color_num = 93
 
     # Define the optimizer (e.g., Adam)
@@ -44,11 +44,11 @@ if __name__ == "__main__":
     
     ### cv params
     n_splits = 5
-    lamb_range = [1e-2, 1e+3]
-    cv_n_trial = 1
+    lamb_range = [5e-3, 5e-2]
+    cv_n_trial = 5
                     
     ### params
-    data_list = ["neutyp", "atyp"]#"atyp", 
+    data_list = ["atyp"]#, "neutyp"
     N_trials = 75
     
     Z_list = [128] # number of participants per group #[10, 50, 100]
@@ -92,7 +92,8 @@ if __name__ == "__main__":
                 for j, participants_list in enumerate(group_pair):
                     dataset = MakeDataset(participants_list=participants_list, data_dir=data_dir)
                     
-                    study_name = f"{data} Z={Z} seed={i} group{j+1}"
+                    study_name = f"{data}_emb={emb_dim}_Z={Z}_seed={i}_group{j+1}_earlystop={early_stopping}"
+                    #study_name = f"{data} Z={Z} seed={i} group{j+1}"
                     
                     ### cross validation
                     cv = KFoldCV(dataset=dataset(),
@@ -112,6 +113,8 @@ if __name__ == "__main__":
 
                     cv.optimize(n_trials=cv_n_trial)
                     lamb = cv.get_best_lamb(show_log=True)
+                    #print(lamb)
+                    #lamb = None
                     
                     ### main
                     main_training = MainTraining(dataset = dataset(N_trials=N_trials), 
@@ -132,20 +135,20 @@ if __name__ == "__main__":
         
                 embeddings_pairs_list.append(embeddings_pair)
                 
-            np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
-            
+            #np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+            np.save(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
     #%%
     ### set n-a embedding pairs
     N_groups_N = 2
     N_groups_A = 2
     for Z in Z_list:
-        embeddings_pairs_list_N = np.load(f"../results/embeddings_pairs_list_neutyp_Z={Z}_Ngroups={N_groups_N}_Ntrials={N_trials}_Nsample={N_sample}.npy")
-        embeddings_pairs_list_A = np.load(f"../results/embeddings_pairs_list_atyp_Z={Z}_Ngroups={N_groups_A}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list_N = np.load(f"../results/embeddings_pairs_list_neutyp_emb={emb_dim}_Z={Z}_Ngroups={N_groups_N}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list_A = np.load(f"../results/embeddings_pairs_list_atyp_emb={emb_dim}_Z={Z}_Ngroups={N_groups_A}_Ntrials={N_trials}_Nsample={N_sample}.npy")
 
         embeddings_pairs_list = []
         for i in range(N_sample):
             embeddings_pair = [embeddings_pairs_list_N[i][0], embeddings_pairs_list_A[i][0]]
             embeddings_pairs_list.append(embeddings_pair)
 
-        np.save(f"../results/embeddings_pairs_list_n-a_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+        np.save(f"../results/embeddings_pairs_list_n-a_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
 # %%
