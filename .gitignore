@@ -4,3 +4,5 @@ poetry.lock
 __pycache__/
 *.pyc
 *.iqdat
+GW_methods
+*.out
