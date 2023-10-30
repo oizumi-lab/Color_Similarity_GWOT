@@ -11,6 +11,7 @@ from sklearn.manifold import MDS
 from sklearn.decomposition import PCA
 import itertools
 import optuna
+from optuna.storages import RDBStorage
 
 #from src.preprocess_utils import *
 from src.utils.utils import get_reorder_idxs
@@ -21,6 +22,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset, random_split, Subset
 from sklearn.model_selection import train_test_split, KFold
+
+from joblib import Parallel, delayed
 
 import ot
 from sklearn.metrics import pairwise_distances
@@ -189,6 +192,7 @@ class KFoldCV():
                      ) -> None:
         
         self.dataset = dataset
+        self.full_data = [data for data in self.dataset]
         self.n_splits = n_splits
         self.search_space = search_space
         
@@ -196,7 +200,15 @@ class KFoldCV():
         self.save_dir = results_dir + "/" + study_name
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
-        self.storage = "sqlite:///" + self.save_dir + "/" + study_name + ".db"
+        
+        #self.storage = "sqlite:///" + self.save_dir + "/" + study_name + ".db"
+        self.storage = RDBStorage(
+            "sqlite:///" + self.save_dir + "/" + study_name + ".db",
+            engine_kwargs={"pool_size": 5, "max_overflow": 10},
+            #retry_interval_seconds=1,
+            #retry_limit=3,
+            #retry_deadline=60
+            )
         
         self.batch_size = batch_size
         self.device = device
@@ -208,6 +220,41 @@ class KFoldCV():
         self.early_stopping = early_stopping
         self.distance_metric = distance_metric
         
+    #def training_for_one_split(self, train_indices, val_indices, lamb):
+    #    
+    #    train_dataset = [self.full_data[i] for i in train_indices]
+    #    valid_dataset = [self.full_data[i] for i in val_indices]
+    #    valid_dataloader = DataLoader(valid_dataset, self.batch_size, shuffle = False)
+    #    train_dataloader = DataLoader(train_dataset, self.batch_size, shuffle = True)
+    #    
+    #    model = EmbeddingModel(emb_dim = self.emb_dim, object_num = self.object_num).to(self.device)
+    #
+    #    model_training = ModelTraining(self.device, 
+    #                                model = model, 
+    #                                train_dataloader = train_dataloader, 
+    #                                valid_dataloader = valid_dataloader, 
+    #                                similarity = "pairwise", 
+    #                                distance_metric = self.distance_metric)
+    #
+    #    loss, test_correct = model_training.main_compute(loss_fn=self.loss_fn, 
+    #                                        lr=self.lr, 
+    #                                        num_epochs=self.n_epoch, 
+    #                                        early_stopping=self.early_stopping,
+    #                                        lamb=lamb, 
+    #                                        show_log=False)
+    #    
+    #    return loss
+    #
+    #def training(self, trial):
+    #    kf = KFold(n_splits=self.n_splits, shuffle=True)
+    #    
+    #    lamb = trial.suggest_float("lamb", self.search_space[0], self.search_space[1], log=True)
+    #    
+    #    cv_losses = Parallel(n_jobs=-1)(delayed(self.training_for_one_split)(train_idx, val_idx, lamb) for train_idx, val_idx in kf.split(self.full_data))
+    #    
+    #    avg_cv_loss = sum(cv_losses) / len(cv_losses)
+    #    
+    #    return avg_cv_loss
         
     def training(self, trial):
         lamb = trial.suggest_float("lamb", self.search_space[0], self.search_space[1], log=True)
@@ -216,8 +263,10 @@ class KFoldCV():
         
         cv_loss = 0
         for train_indices, val_indices in kf.split(self.dataset):
-            train_dataset = Subset(self.dataset, train_indices)
-            valid_dataset = Subset(self.dataset, val_indices)
+            #train_dataset = Subset(self.dataset, train_indices)
+            #valid_dataset = Subset(self.dataset, val_indices)
+            train_dataset = [self.full_data[i] for i in train_indices]
+            valid_dataset = [self.full_data[i] for i in val_indices]
             valid_dataloader = DataLoader(valid_dataset, self.batch_size, shuffle = False)
             train_dataloader = DataLoader(train_dataset, self.batch_size, shuffle = True)
             
