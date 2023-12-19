@@ -316,7 +316,7 @@ class KFoldCV():
 #%%
 if __name__ == "__main__":
     ### Set parameters
-    N_groups = 20
+    N_groups = 1
     
     data = "neutyp" # "neutyp" or "atyp"
     
@@ -332,24 +332,25 @@ if __name__ == "__main__":
                                                  seed=0)
     
     # device 
-    device = "cuda:1" if torch.cuda.is_available() else "cpu"
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
     # Train the model
-    emb_dim = 5
+    emb_dim = 20
     color_num = 93
+    num_color_pairs = None # 75
     
     # Define the optimizer (e.g., Adam)
     lr = 0.01
     num_epochs = 100
     batch_size = 100
-    early_stopping = True
+    early_stopping = False
 
     loss_fn = nn.MSELoss(reduction="sum")
     distance_metric = "euclidean"
     
     ### cv params
     n_splits = 5
-    lamb_range = [1e-10, 100]
+    lamb_range = [1e-5, 1]
     study_name = f"{data} Ngroup={N_groups}"
     n_trials = 10
     
@@ -365,7 +366,7 @@ if __name__ == "__main__":
     #%%
     ### Main computation
     rearranged_color_embeddings_list = []
-    for i in [2]:
+    for i in range(N_groups):
         dataset = MakeDataset(participants_list=participants_list[i], data_dir=data_dir)
 
         ### cross validation
@@ -388,7 +389,7 @@ if __name__ == "__main__":
         lamb = cv.get_best_lamb(show_log=True)
         
         ### main
-        main_training = MainTraining(dataset = dataset(N_trials=76), 
+        main_training = MainTraining(dataset = dataset(N_trials=num_color_pairs), 
                                      test_size = 1/n_splits, 
                                      batch_size = batch_size, 
                                      device = device)
@@ -414,33 +415,33 @@ if __name__ == "__main__":
     #plt.hist(np.max(np.abs(embeddings), axis=0))
     #plt.show()
     # %%
-    # Load the data file
-    num_response = []
-    num_non_Nan = []
-    for i in range(257):
-        data_dir = "../data/color_atypical/numpy_data/"
-        filepath = f"participant_{i}.npy"
-        data = np.load(data_dir + filepath, allow_pickle=True)
-        data = data.astype(np.float64)
-
-        # count the number of non Nan elements
-        non_nan = np.count_nonzero(~np.isnan(data))
-        num_non_Nan.append(non_nan)
-
-        # Get lower triangle indices where data is not NaN
-        lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
-        values = data[lower_triangle_indices]
-        non_nan_indices = np.where(~np.isnan(values))
-
-        # Get final indices and values
-        final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
-        final_values = values[non_nan_indices]
-
-        X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
-        y = list(final_values)
-
-        num_response.append(len(y))
-    # %%
-    print(num_non_Nan)
-    print(num_response)
+    ## Load the data file
+    #num_response = []
+    #num_non_Nan = []
+    #for i in range(257):
+    #    data_dir = "../data/color_atypical/numpy_data/"
+    #    filepath = f"participant_{i}.npy"
+    #    data = np.load(data_dir + filepath, allow_pickle=True)
+    #    data = data.astype(np.float64)
+#
+    #    # count the number of non Nan elements
+    #    non_nan = np.count_nonzero(~np.isnan(data))
+    #    num_non_Nan.append(non_nan)
+#
+    #    # Get lower triangle indices where data is not NaN
+    #    lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
+    #    values = data[lower_triangle_indices]
+    #    non_nan_indices = np.where(~np.isnan(values))
+#
+    #    # Get final indices and values
+    #    final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
+    #    final_values = values[non_nan_indices]
+#
+    #    X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
+    #    y = list(final_values)
+#
+    #    num_response.append(len(y))
+    ## %%
+    #print(num_non_Nan)
+    #print(num_response)
 # %%
