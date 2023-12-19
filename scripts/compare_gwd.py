@@ -5,6 +5,7 @@ import seaborn as sns
 import sqlite3
 import os
 #%%
+plt.style.use('seaborn-v0_8-darkgrid')
 data_list = ["neutyp","atyp","n-a"] #
 Z_list = [16,32,64,128] # 
 N_sample = 20 # number of sampling
@@ -40,9 +41,9 @@ for j, data in enumerate(data_list):
         df = pd.concat([df, df_temp])
             
 name_mapping = {
-    'neutyp': 'N v.s. N',
+    'neutyp': 'T v.s. T',
     'atyp': 'A v.s. A',
-    'n-a': 'N v.s. A'
+    'n-a': 'T v.s. A'
 }
 df['data'] = df['data'].replace(name_mapping)
 
@@ -78,16 +79,19 @@ for j, data in enumerate(data_list):
         df = pd.concat([df, df_temp])
             
 name_mapping = {
-    'neutyp': 'N v.s. N',
+    'neutyp': 'T v.s. T',
     'atyp': 'A v.s. A',
-    'n-a': 'N v.s. A'
+    'n-a': 'T v.s. A'
 }
 df['data'] = df['data'].replace(name_mapping)
 
 
 #%%
 # 色のパレットを設定する
-palette = sns.color_palette("bright", n_colors=len(labels))
+#palette = sns.color_palette("bright", n_colors=len(labels))
+palette = sns.color_palette("bright", n_colors=6)
+# reverse the order of the palette
+palette = palette[::-1]
 
 # エラーバー付きのプロットを作成する
 plt.figure(figsize=(6, 6))
@@ -98,7 +102,7 @@ plt.figure(figsize=(6, 6))
 # make swarm plot but different columns for N-N, A-A, N-A
 #sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', palette='bright', size=10)
 # Create a swarmplot with dodging
-sns.swarmplot(data=df, x='Z', y='min_gwd', hue='data', dodge=True, palette='bright', size=3)
+sns.swarmplot(data=df, x='Z', y='min_gwd', hue='data', dodge=True, palette=palette, size=3)
 
 # Customize ticks and labels
 labels = ["1200\n(Z=16)", "2400\n(Z=32)", "4800\n(Z=64)", "9600\n(Z=128)"]

@@ -44,17 +44,17 @@ if __name__ == "__main__":
     
     ### cv params
     n_splits = 5
-    lamb_range = [5e-3, 5e-2]
-    cv_n_trial = 5
+    lamb_range = [1e-3, 1e-1]
+    cv_n_trial = 20
                     
     ### params
-    data_list = ["atyp"]#, "neutyp"
+    data_list = ['n-a']#, "neutyp", "atyp"
     N_trials = 75
     
-    Z_list = [128] # number of participants per group #[10, 50, 100]
+    Z_list = [16, 32, 64] # number of participants per group #[10, 50, 100]128, 
     N_groups = 2 # fix
     
-    N_sample = 1 # number of sampling
+    N_sample = 20 # number of sampling
     seed_list = range(N_sample)
     
     #%%
@@ -68,6 +68,10 @@ if __name__ == "__main__":
             elif data == "atyp":
                 N_participant = 257
                 data_dir = "../data/color_atypical/numpy_data/"
+                
+            elif data=='n-a':
+                N_participant_list = [426, 257]
+                data_dir_list = ["../data/color_neurotypical/numpy_data/", "../data/color_atypical/numpy_data/"]
             
             # load color codes
             old_color_order = list(np.load('../data/hex_code/original_color_order.npy'))
@@ -79,17 +83,29 @@ if __name__ == "__main__":
             ### set participants list
             group_pairs_list = []
             for seed in seed_list:
-                sampled_participants = sample_participants(N=N_participant, Z=Z*N_groups, seed=seed)
-                group_pair = split_lists(sampled_participants, N_groups)
-                group_pairs_list.append(group_pair)
+                    
+                if data=='neutyp' or data=='atyp':
+                    sampled_participants = sample_participants(N=N_participant, Z=Z*N_groups, seed=seed)
+                    group_pair = split_lists(sampled_participants, N_groups)
+                    group_pairs_list.append(group_pair)
+                    
+                elif data=='n-a':
+                    group_pair = [] # group of [neutyp, atyp]
+                    for N_participant in N_participant_list:
+                        sampled_participants = sample_participants(N=N_participant, Z=Z, seed=seed+N_sample) # seed+N_sample to avoid overlap
+                        group_pair.append(sampled_participants)
+                    group_pairs_list.append(group_pair)
                 
             
             ### estimate embeddings
             embeddings_pairs_list = []
             for i, group_pair in enumerate(group_pairs_list):
+                # group_pair = [neutyp, atyp]
                 
                 embeddings_pair = []
                 for j, participants_list in enumerate(group_pair):
+                    data_dir = data_dir_list[j] if data=='n-a' else data_dir
+                    
                     dataset = MakeDataset(participants_list=participants_list, data_dir=data_dir)
                     
                     study_name = f"{data}_emb={emb_dim}_Z={Z}_seed={i}_group{j+1}_earlystop={early_stopping}"
@@ -136,7 +152,7 @@ if __name__ == "__main__":
                 embeddings_pairs_list.append(embeddings_pair)
                 
             #np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
-            np.save(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+            np.save(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}{'_independent' if data=='n-a' else ''}.npy", embeddings_pairs_list)
     #%%
     ### set n-a embedding pairs
     N_groups_N = 2

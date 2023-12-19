@@ -1,13 +1,17 @@
 #%%
 import os, sys
 sys.path.append(os.path.join(os.getcwd(), '../../'))
+sys.path.append(os.path.join(os.getcwd(), '../../../'))
 
 import numpy as np
 import pandas as pd
 import pickle as pkl
 import torch
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from GW_methods.src.align_representations import Representation, AlignRepresentations, OptimizationConfig, VisualizationConfig
+#from ...src.utils.utils import get_flipped_mat, get_shifted_mat, get_eval_mat
 
 #%%
 # list of representations where the instances of "Representation" class are included
@@ -136,6 +140,7 @@ visualize_config = VisualizationConfig(
 )
 
 sim_mat_format = "default"
+fig_dir = "../../results/figs/9colors/"
 
 align_representation.gw_alignment(
     compute_OT = compute_OT,
@@ -144,12 +149,12 @@ align_representation.gw_alignment(
     return_figure = False,
     OT_format = sim_mat_format,
     visualization_config = visualize_config,
-    fig_dir="../../results/figs/9colors/",
+    fig_dir=fig_dir,
     save_dataframe=True
 )
 # %%
 align_representation.show_optimization_log(
-    fig_dir="../../results/figs/9colors/",
+    fig_dir=fig_dir,
     visualization_config=visualize_config
 )
 
@@ -165,15 +170,125 @@ align_representation.calc_accuracy(
 
 align_representation.plot_accuracy(
     eval_type="ot_plan",
-    fig_dir="../../results/figs/9colors/",
+    fig_dir=fig_dir,
     fig_name="accuracy_ot_plan.png"
 )
 
 align_representation.plot_accuracy(
     eval_type="k_nearest",
-    fig_dir="../../results/figs/9colors/",
+    fig_dir=fig_dir,
     fig_name="accuracy_k_nearest.png"
 )
+
+#%%
+### evaluation using eval mat
+
+def get_shifted_mat(matrix, i):
+    return np.roll(matrix, i, axis=1)
+
+def get_flipped_mat(matrix):
+    return np.fliplr(matrix)
+
+def get_eval_mat(matrix, shift=0, flip=False):
+    if flip:
+        matrix = get_flipped_mat(matrix)
+    eval_mat = get_shifted_mat(matrix, shift)
+
+    return eval_mat
+
+
+mat_size = 9
+num_shift = 9
+eval_mat_org = np.eye(mat_size)
+# show eval mat
+plt.figure()
+plt.imshow(eval_mat_org, cmap='cividis')
+plt.show()
+
+data_list = pd.DataFrame(columns=['flip', 'shift', 'matching rate', 'condition'])
+for flip in [True, False]:
+    for shift in range(num_shift):
+        eval_mat = get_eval_mat(eval_mat_org, shift, flip)
+        # show eval mat
+        title = f'Eval_mat_flip={str(flip)}_shift={shift}'
+        plt.figure()
+        plt.imshow(eval_mat, cmap='cividis')
+        plt.grid(False)
+        plt.xticks([])
+        plt.yticks([])
+        plt.title(title.replace('_', ' '))
+        plt.show()
+        plt.savefig(os.path.join(fig_dir, title+'.png'))
+        df_acc = align_representation.calc_accuracy(top_k_list=[1], eval_type='ot_plan', eval_mat=eval_mat, return_dataframe=True)
+        
+        df_acc = df_acc.T
+        df_acc.index.name = 'pair_name'
+        # change column name
+        df_acc.columns = ['matching rate']
+        
+        df_acc['flip'] = [str(flip)]*len(df_acc)
+        df_acc['shift'] = [shift]*len(df_acc)
+        df_acc['condition'] = ['all pair']*len(df_acc)
+        
+        data_list = pd.concat([data_list, df_acc], axis=0)
+
+# random
+for flip in [True, False]:
+    for shift in range(num_shift):
+        # calc accuracy for random matrices
+        # shuffle OT plan
+        for pairwise in align_representation.pairwise_list:
+            pairwise.OT = np.random.permutation(pairwise.OT)
+        
+        df_random = align_representation.calc_accuracy(top_k_list=[1], eval_type='ot_plan', eval_mat=eval_mat, return_dataframe=True)
+
+        df_random = df_random.T
+        df_random.index.name = 'pair_name'
+        # change column name
+        df_random.columns = ['matching rate']
+        
+        df_random['flip'] = [str(flip)]*len(df_random)
+        df_random['shift'] = [shift]*len(df_random)
+        df_random['condition'] = ['random']*len(df_random)
+        
+        data_list = pd.concat([data_list, df_random], axis=0)
+#%%
+# save
+save_dir = '../../results/gw_alignment/9colors/'
+data_list.to_csv(os.path.join(save_dir, 'flip&shift_matching_rate.csv'))
+#%%
+# get the maximum top 1 for each pair
+# make sure you take the maximum value of matching rate for each pair
+data_list = pd.read_csv(os.path.join(save_dir, 'flip&shift_matching_rate.csv'), index_col=0)
+data_list.index.name = 'pair_name'
+data_list = data_list.reset_index()
+
+# drop 'shift' and 'flip'
+data_list = data_list.drop(['shift', 'flip'], axis=1)
+
+# group by 'condition'
+data_list_allpair = data_list[data_list['condition']=='all pair']
+data_list_random = data_list[data_list['condition']=='random']
+
+data_list_allpair = data_list_allpair.groupby('pair_name').max()
+data_list_random = data_list_random.groupby('pair_name').max()
+
+data_list = pd.concat([data_list_allpair, data_list_random], axis=0)
+
+#%%
+# plot using seaborn
+plt.figure(figsize=(8, 6))
+plt.style.use('seaborn-v0_8-darkgrid')
+palette = sns.color_palette("bright", n_colors=2)
+
+sns.swarmplot(x='condition', y='matching rate', data=data_list, palette=palette, size=8)
+plt.xticks(rotation=90)
+plt.xlabel('')
+plt.ylabel('matching rate')
+plt.title('Matching rate for each pair')
+plt.ylim([-5, 105])
+plt.show()
+plt.savefig(os.path.join(fig_dir, 'flip&shift_matching_rate.png'))
 
 
 

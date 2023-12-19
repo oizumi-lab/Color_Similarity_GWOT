@@ -121,3 +121,34 @@ def k_nearest_colors_matching_rate(dist_mat, source_dict, target_dict, k):
 
     correct_rate = count / dist_mat.shape[0] * 100
     return count, correct_rate
+
+def get_shifted_mat(matrix, i):
+    return np.roll(matrix, i, axis=1)
+
+def get_flipped_mat(matrix):
+    return np.fliplr(matrix)
+
+def get_eval_mat(matrix, data_select, shift=0, flip=False):
+    if data_select == 'disks':
+        if flip:
+            matrix = get_flipped_mat(matrix)
+        eval_mat = get_shifted_mat(matrix, shift)
+    
+    if data_select == 'LsTs':
+        m, n = matrix.shape # (32, 32)
+        num_Ls = num_Ts = 8
+        num_blocks = m // num_Ls # 4
+        
+        if flip:
+            matrix = get_flipped_mat(matrix)
+            matrix = get_shifted_mat(matrix, num_Ls)
+        
+        eval_mat = []
+        for i in range(num_blocks):
+            block_mat = matrix[:, num_Ls*i : num_Ls*(i+1)]
+            block_mat = get_shifted_mat(block_mat, shift)
+            eval_mat.append(block_mat)
+        
+        eval_mat = np.concatenate(eval_mat, axis=1)
+
+    return eval_mat

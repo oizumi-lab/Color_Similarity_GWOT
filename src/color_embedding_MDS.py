@@ -405,36 +405,42 @@ if __name__ == "__main__":
         rearranged_color_embeddings_list.append(color_embeddings[reorder_idxs, :])
     np.save(f"../results/rearranged_embeddings_list_{data}_Ngroup={N_groups}.npy", rearranged_color_embeddings_list)
 
-# %%    
-#### check dimensionality
-#embeddings = rearranged_color_embeddings_list[0]
-#plt.hist(np.abs(embeddings).flatten())
-#plt.show()
-#
-#plt.hist(np.max(np.abs(embeddings), axis=0))
-#plt.show()
-# %%
-# Load the data file
-num_response = []
-for i in range(257):
-    data_dir = "../data/color_atypical/numpy_data/"
-    filepath = f"participant_{i}.npy"
-    data = np.load(data_dir + filepath, allow_pickle=True)
-    data = data.astype(np.float64)
+    # %%    
+    #### check dimensionality
+    #embeddings = rearranged_color_embeddings_list[0]
+    #plt.hist(np.abs(embeddings).flatten())
+    #plt.show()
+    #
+    #plt.hist(np.max(np.abs(embeddings), axis=0))
+    #plt.show()
+    # %%
+    # Load the data file
+    num_response = []
+    num_non_Nan = []
+    for i in range(257):
+        data_dir = "../data/color_atypical/numpy_data/"
+        filepath = f"participant_{i}.npy"
+        data = np.load(data_dir + filepath, allow_pickle=True)
+        data = data.astype(np.float64)
 
-    # Get lower triangle indices where data is not NaN
-    lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
-    values = data[lower_triangle_indices]
-    non_nan_indices = np.where(~np.isnan(values))
+        # count the number of non Nan elements
+        non_nan = np.count_nonzero(~np.isnan(data))
+        num_non_Nan.append(non_nan)
 
-    # Get final indices and values
-    final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
-    final_values = values[non_nan_indices]
+        # Get lower triangle indices where data is not NaN
+        lower_triangle_indices = np.tril_indices(data.shape[0], -1)  # -1 excludes the diagonal
+        values = data[lower_triangle_indices]
+        non_nan_indices = np.where(~np.isnan(values))
 
-    X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
-    y = list(final_values)
-    
-    num_response.append(len(y))
-# %%
-min(num_response)
+        # Get final indices and values
+        final_indices = (lower_triangle_indices[0][non_nan_indices], lower_triangle_indices[1][non_nan_indices])
+        final_values = values[non_nan_indices]
+
+        X = list(zip(*final_indices)) # Zip the indices to get (row, col) pairs
+        y = list(final_values)
+
+        num_response.append(len(y))
+    # %%
+    print(num_non_Nan)
+    print(num_response)
 # %%

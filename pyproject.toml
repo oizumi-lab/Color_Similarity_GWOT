@@ -10,7 +10,7 @@ packages = [
 python = ">=3.9,<3.11"
 cython = "*"
 numpy = "*"
-matplotlib = "*"
+matplotlib = ">=3.6, <3.8.0"
 pandas = "^1.5.0"
 scikit-learn = "*"
 POT = "*"

@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 #%%
+plt.style.use('seaborn-v0_8-darkgrid')
+
 data_list = ["neutyp","atyp","n-a"]#
 Z_list = [16,32,64,128]#
 N_sample = 20 # number of sampling
@@ -106,9 +108,9 @@ for j, data in enumerate(data_list):
 
 # change labels
 name_mapping = {
-    'neutyp': 'N v.s. N',
+    'neutyp': 'T v.s. T',
     'atyp': 'A v.s. A',
-    'n-a': 'N v.s. A'
+    'n-a': 'T v.s. A'
 }
 df_OT_top_k_all["data"] = df_OT_top_k_all["data"].replace(name_mapping)
 df_k_nearest_all["data"] = df_k_nearest_all["data"].replace(name_mapping)
@@ -151,7 +153,9 @@ print(f"ave_NN={ave_NN}, ave_AA={ave_AA}, ave_NA={ave_NA}")
 #df_std = df_filtered.pivot(index='Z', columns='data', values='std')
 
 # 色のパレットを設定する
-palette = sns.color_palette("bright", n_colors=len(labels))
+palette = sns.color_palette("bright", n_colors=6)
+# reverse the order of the palette
+palette = palette[::-1]
 
 # エラーバー付きのプロットを作成する
 plt.figure(figsize=(6, 6))
@@ -162,8 +166,12 @@ plt.figure(figsize=(6, 6))
 # make swarm plot but different columns for N-N, A-A, N-A
 #sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', palette='bright', size=10)
 # Create a swarmplot with dodging
-sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', dodge=True, palette='bright', size=3)
+sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', dodge=True, palette=palette, size=3)
 
+# Plot chance level
+# for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
+plt.plot([-0.5, 3.5], [100/93, 100/93], color='black', linestyle='dashed', linewidth=2)
+    
 labels = ["1200\n(Z=16)", "2400\n(Z=32)", "4800\n(Z=64)", "9600\n(Z=128)"]
 # Customize ticks and labels
 plt.xticks(ticks=[0, 1, 2, 3], labels=labels)
@@ -253,7 +261,7 @@ import matplotlib.pyplot as plt
 # Assuming df_OT_top_k_all is already prepared
 df_filtered = df_OT_top_k_all[df_OT_top_k_all['Z'] == 128]  # Filtering only for Z=128
 
-conditions = ['N v.s. N', 'A v.s. A', 'N v.s. A']  # The conditions you want to plot
+conditions = ['T v.s. T', 'A v.s. A', 'T v.s. A']  # The conditions you want to plot
 
 for condition in conditions:
     plt.figure(figsize=(6, 6))
@@ -262,13 +270,19 @@ for condition in conditions:
     
     # Creating the swarmplot
     sns.swarmplot(x='top_k', y='accuracy', data=df_condition, palette=palette, size=8)
-
+    
+    # Plot chance level on the graph
+    # for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
+    plt.plot([-0.7, 0.5], [100/93, 100/93], color='black', linestyle='dashed', linewidth=2)
+    plt.plot([0.5, 1.5], [300/93, 300/93], color='black', linestyle='dashed', linewidth=2)
+    plt.plot([1.5, 2.5], [500/93, 500/93], color='black', linestyle='dashed', linewidth=2)
+    
     #plt.title(f'Top-1, 3, 5 Matching Rates for {condition} at Z=128')
-    plt.xlabel('Top-k', size=15)
-    plt.ylabel('Matching Rate', size=15)
+    plt.xlabel('Top-k', size=35)
+    plt.ylabel('Matching Rate', size=35)
     plt.xticks(ticks=[0, 1, 2], labels=['1', '3', '5'])
-    plt.xticks(size=15)
-    plt.yticks(size=15)
+    plt.xticks(size=30)
+    plt.yticks(size=30)
     # ylim [0,100]
     plt.ylim([-5, 105])
     plt.tight_layout()
