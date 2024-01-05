@@ -385,7 +385,7 @@ if __name__ == "__main__":
                      early_stopping=early_stopping,
                      distance_metric=distance_metric)
         
-        cv.optimize(n_trials=n_trials)
+        #cv.optimize(n_trials=n_trials)
         lamb = cv.get_best_lamb(show_log=True)
         
         ### main
