@@ -57,7 +57,7 @@ class MakeDataset:
         self.participants_list = participants_list 
         self.data_dir = data_dir
     
-    def get_response_array(self, N_trials):
+    def get_response_array(self, N_trials=None):
         # Create empty lists to store X and y
         X_np = []
         y_np = []
@@ -318,7 +318,7 @@ if __name__ == "__main__":
     ### Set parameters
     N_groups = 1
     
-    data = "neutyp" # "neutyp" or "atyp"
+    data = "atyp" # "neutyp" or "atyp"
     
     if data == "neutyp":
         N_participant = 426
@@ -370,23 +370,24 @@ if __name__ == "__main__":
         dataset = MakeDataset(participants_list=participants_list[i], data_dir=data_dir)
 
         ### cross validation
-        cv = KFoldCV(dataset=dataset(),
-                     n_splits=n_splits,
-                     search_space=lamb_range,
-                     study_name=study_name,
-                     results_dir="../results",
-                     batch_size=batch_size,
-                     device=device,
-                     loss_fn=loss_fn,
-                     emb_dim=emb_dim,
-                     object_num=color_num,
-                     n_epoch=num_epochs,
-                     lr=lr,
-                     early_stopping=early_stopping,
-                     distance_metric=distance_metric)
-        
-        #cv.optimize(n_trials=n_trials)
-        lamb = cv.get_best_lamb(show_log=True)
+        #cv = KFoldCV(dataset=dataset(N_trials=num_color_pairs),
+        #             n_splits=n_splits,
+        #             search_space=lamb_range,
+        #             study_name=study_name,
+        #             results_dir="../results",
+        #             batch_size=batch_size,
+        #             device=device,
+        #             loss_fn=loss_fn,
+        #             emb_dim=emb_dim,
+        #             object_num=color_num,
+        #             n_epoch=num_epochs,
+        #             lr=lr,
+        #             early_stopping=early_stopping,
+        #             distance_metric=distance_metric)
+        #
+        ##cv.optimize(n_trials=n_trials)
+        #lamb = cv.get_best_lamb(show_log=True)
+        lamb = 0.01
         
         ### main
         main_training = MainTraining(dataset = dataset(N_trials=num_color_pairs), 
