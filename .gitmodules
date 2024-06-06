@@ -1,0 +1,9 @@
+[submodule "GW_methods"]
+    path = GW_methods
+    url = https://github.com/oizumi-lab/GW_methods.git
+    branch = takeda
+
+[submodule "unbalancedgw"]
+    path = unbalancedgw
+    url = https://github.com/oizumi-lab/unbalancedgw.git
+    branch = master
