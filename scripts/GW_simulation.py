@@ -114,12 +114,13 @@ def RSA(matrix1, matrix2):
 # Search for the optimal noise level that produces the desired correlations and accuracies
 n_dimensions = 30
 n_points_per_clusters = [2, 5]#
+
 # objective accuracy
 objective_accuracis = [50, 18]#
-spread_centers = 10
+
+spread_centers = 10 # fix
 
 iter_max = 1000
-# set seed values for all trials
 
 for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clusters):
     
@@ -139,7 +140,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
 
         # Generate random points around the centers
         correlation = 1.0
-        spread_around = 0.1
+        spread_around = 0.1 # noise
 
         # keep the correlation around 0.6
         while correlation > 0.7:

@@ -1,0 +1,4 @@
+[submodule "GW_methods"]
+    path = GW_methods
+    url = git@github.com:oizumi-lab/GW_methods.git
+    branch = takeda
