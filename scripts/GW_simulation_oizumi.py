@@ -111,25 +111,43 @@ def RSA(matrix1, matrix2):
     return pearsonr(upper_triangle1, upper_triangle2)[0]
 #%%
 # Search for the optimal noise level that produces the desired correlations and accuracies
-n_dimensions = 100
+n_dimensions = 50
 n_points_per_clusters = [2]#
 # objective accuracy
-objective_accuracis = [30]#
+objective_accuracis = [20]#
 spread_centers = 10
 
-iter_max = 100
+
 # set seed values for all trials
+eps_list = [1, 10] # best for n_points_per_cluster = 2
+# eps_list = [0.5, 5] # best for n_points_per_cluster = 1
+seed_fixed = 9666
 
-device = "cpu"
+if seed_fixed == False:
+    iter_max = 100 # number of seed searches
+    num_trial = 20 # number of GW epsilon searches
+    delete_results = True
+    trial_number = "_seed_random2"
+else:
+    iter_max = 1
+    num_trial = 400
+    delete_results = False
+    compute_OT = False
+    trial_number = f'_medium_acc_seed{seed_fixed}'
+        
 
-if device == "cuda":
-    to_types = "torch"
-    data_type = "float"
-    sinkhorn_method = "sinkhorn_log"
-elif device == "cpu":
+device = "cuda:1"
+
+if device == "cpu":
     to_types = "numpy"
     data_type = "double"
     sinkhorn_method = "sinkhorn"
+else:
+    to_types = "torch"
+    data_type = "double"
+    sinkhorn_method = "sinkhorn"
+    # data_type = "float"
+    # sinkhorn_method = "sinkhorn_log"
 
 for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clusters):
     
@@ -144,6 +162,8 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
     # iterate until the accuracy is above the objective accuracy
     while acc < objective and n_iter < iter_max:
         # Cluster size
+        print(f"iteration: {n_iter} begins")
+        print(f"-------------------------------------------")
         n_clusters = 93 // n_points_per_cluster
         interpolation_points = 93 - n_clusters * n_points_per_cluster
 
@@ -154,7 +174,10 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
         # keep the correlation around 0.6
         while correlation > 0.7 or correlation < 0.6:
             # set seed randomly
-            seed = np.random.randint(10000)
+            if seed_fixed == False:
+                seed = np.random.randint(10000)
+            else:
+                seed = seed_fixed
             
             # check if the seed is already used
             while seed in pre_seed_list:
@@ -180,9 +203,9 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
 
             # keep the correlation above 0.6
             if correlation < 0.6:
-                spread_around -= 0.1
+                spread_around -= 0.05
             else:
-                spread_around += 0.1
+                spread_around += 0.05
 
         # save the seed and the spread
         print(f"n_points_per_cluster: {n_points_per_cluster}, seed: {seed}, spread_around: {spread_around}")
@@ -202,12 +225,11 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             name="2",
             metric="euclidean",
             embedding=embedding_2,
-
         )
 
         config = OptimizationConfig(
-            eps_list=[1, 10],
-            num_trial=20, #50
+            eps_list=eps_list,
+            num_trial=num_trial,
             db_params={"drivername": "sqlite"},
             n_iter=1,
             to_types=to_types,  # user can choose "numpy" or "torch". please set "torch" if one wants to use GPU.
@@ -221,7 +243,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             title_size = 0, 
             cmap = "rocket_r",
             cbar_ticks_size=10,
-            font="Arial",
+            # font="Arial",
             color_labels=colors,
             color_label_width=3
         )
@@ -248,7 +270,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             title_size = 0, 
             cmap = "viridis",
             cbar_ticks_size=15,
-            font="Arial",
+            # font="Arial",
             xlabel_size=20,
             xticks_size=15,
             ylabel_size=20,
@@ -262,9 +284,8 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             config=config,
             representations_list=[Group1, Group2],
             main_results_dir="../results/",
-            data_name=f"Simulation_colors_cluster_{n_clusters}"
+            data_name=f"Simulation_colors_cluster_{n_clusters}_trial{trial_number}"
         )
-
 
         # RSA
         fig_dir = f"../results/figs/Simulation_colors_cluster/{n_clusters}clusters"
@@ -282,8 +303,8 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
 
         # GW
         alignment.gw_alignment(
-            compute_OT=False,
-            delete_results=True,
+            compute_OT=compute_OT,
+            delete_results=delete_results,
             visualization_config=vis_config,
             fig_dir=fig_dir
             )
@@ -300,7 +321,16 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
         acc = df.iloc[0].values.item()
         acc_log.append(acc)
         
+        print(f"iteration: {n_iter} ended")
+        print(f"-------------------------------------------")
+        
         n_iter += 1
+    
+    
+    if acc > objective:
+        print(f"objective accuracy: {objective} achieved")
+    else:
+        print(f"objective accuracy: {objective} not achieved within {iter_max} iterations")
         
     # save the seed and the spread and the accuracy
     result = pd.DataFrame({
@@ -308,7 +338,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
         "spread_around": spread_around_log,
         "accuracy": acc_log
     })
-    result.to_csv(f"../results/Simulation_colors_cluster_{n_clusters}_results.csv")
+    result.to_csv(f"../results/Simulation_colors_cluster_{n_clusters}_trial{trial_number}.csv")
 
 
    #%%
