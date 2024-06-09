@@ -121,7 +121,13 @@ spread_centers = 10
 # set seed values for all trials
 eps_list = [1, 10] # best for n_points_per_cluster = 2
 # eps_list = [0.5, 5] # best for n_points_per_cluster = 1
-seed_fixed = 9666
+
+# good seeds Oizumi found
+
+if n_points_per_clusters[0] == 2:
+    seed_fixed = 9666 # n_points_per_cluster = 2, 26.8% accuracy
+elif n_points_per_clusters[0] == 1:
+    seed_fixed = 8540 # n_points_per_cluster = 1, 70% accuracy
 
 if seed_fixed == False:
     iter_max = 100 # number of seed searches
