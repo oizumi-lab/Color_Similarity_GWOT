@@ -112,15 +112,14 @@ def RSA(matrix1, matrix2):
 
 #%%
 # Search for the optimal noise level that produces the desired correlations and accuracies
-n_dimensions = 30
-n_points_per_clusters = [2, 5]#
-
+n_dimensions = 500
+n_points_per_clusters = [2]#
 # objective accuracy
-objective_accuracis = [50, 18]#
+objective_accuracis = [20]#
+spread_centers = 10
 
-spread_centers = 10 # fix
-
-iter_max = 1000
+iter_max = 50
+# set seed values for all trials
 
 for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clusters):
     
