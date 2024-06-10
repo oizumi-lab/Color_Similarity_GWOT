@@ -112,22 +112,19 @@ def RSA(matrix1, matrix2):
 #%%
 # Search for the optimal noise level that produces the desired correlations and accuracies
 n_dimensions = 50
-n_points_per_clusters = [2]#
+n_points_per_clusters = [1]#
 # objective accuracy
 objective_accuracis = [20]#
 spread_centers = 10
 
 
-# set seed values for all trials
-eps_list = [1, 10] # best for n_points_per_cluster = 2
-# eps_list = [0.5, 5] # best for n_points_per_cluster = 1
-
 # good seeds Oizumi found
-
 if n_points_per_clusters[0] == 2:
     seed_fixed = 9666 # n_points_per_cluster = 2, 26.8% accuracy
+    eps_list = [1, 10] # best for n_points_per_cluster = 2
 elif n_points_per_clusters[0] == 1:
     seed_fixed = 8540 # n_points_per_cluster = 1, 70% accuracy
+    eps_list = [0.5, 5] # best for n_points_per_cluster = 1
 
 if seed_fixed == False:
     iter_max = 100 # number of seed searches
@@ -135,14 +132,14 @@ if seed_fixed == False:
     delete_results = True
     trial_number = "_seed_random2"
 else:
-    iter_max = 1
-    num_trial = 400
+    iter_max = 1 # number of seed searches
+    num_trial = 400 # number of GW epsilon searches
     delete_results = False
     compute_OT = False
     trial_number = f'_medium_acc_seed{seed_fixed}'
         
 
-device = "cuda:1"
+device = "cpu"
 
 if device == "cpu":
     to_types = "numpy"
@@ -250,7 +247,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             cmap = "rocket_r",
             cbar_ticks_size=10,
             # font="Arial",
-            color_labels=colors,
+            # color_labels=colors,
             color_label_width=3
         )
 
@@ -258,7 +255,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             figsize=(8, 8), 
             legend_size=12,
             marker_size=60,
-            color_labels=colors,
+            # color_labels=colors,
             fig_ext='svg',
             markers_list=['o', 'X']
         )
@@ -266,7 +263,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             figsize=(8, 8), 
             legend_size=12,
             marker_size=60,
-            color_labels=colors,
+            # color_labels=colors,
             fig_ext='svg',
             markers_list=['X']
         )
