@@ -117,26 +117,34 @@ n_points_per_clusters = [1]#
 objective_accuracis = [20]#
 spread_centers = 10
 
-
 # good seeds Oizumi found
 if n_points_per_clusters[0] == 2:
     seed_fixed = 9666 # n_points_per_cluster = 2, 26.8% accuracy
     eps_list = [1, 10] # best for n_points_per_cluster = 2
 elif n_points_per_clusters[0] == 1:
     seed_fixed = 8540 # n_points_per_cluster = 1, 70% accuracy
+    seed_fixed = 8 # n_points_per_cluster = 1, medium level accuracy
+    # seed_fixed = 7 # n_points_per_cluster = 1, low level accuracy
     eps_list = [0.5, 5] # best for n_points_per_cluster = 1
 
+# seed_fixed = False
 if seed_fixed == False:
-    iter_max = 100 # number of seed searches
+    iter_max = 10 # number of seed searches
     num_trial = 20 # number of GW epsilon searches
     delete_results = True
-    trial_number = "_seed_random2"
+    trial_number = "_seed_random3"
 else:
     iter_max = 1 # number of seed searches
-    num_trial = 400 # number of GW epsilon searches
+    num_trial = 200 # number of GW epsilon searches
     delete_results = False
     compute_OT = False
-    trial_number = f'_medium_acc_seed{seed_fixed}'
+    
+    if seed_fixed == 8540:
+        trial_number = f'_high_acc_seed{seed_fixed}'
+    elif seed_fixed == 8:
+        trial_number = f'_medium_acc_seed{seed_fixed}'
+    elif seed_fixed == 7:
+        trial_number = f'_low_acc_seed{seed_fixed}'
         
 
 device = "cpu"
@@ -171,7 +179,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
         interpolation_points = 93 - n_clusters * n_points_per_cluster
 
         # Generate random points around the centers
-        correlation = 0
+        correlation = 0 # initialize the correlation
         spread_around = 0.1
 
         # keep the correlation around 0.6
@@ -179,6 +187,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             # set seed randomly
             if seed_fixed == False:
                 seed = np.random.randint(10000)
+                seed = n_iter
             else:
                 seed = seed_fixed
             
