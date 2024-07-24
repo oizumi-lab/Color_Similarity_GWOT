@@ -1,11 +1,13 @@
 #%%
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
+from sklearn.manifold import TSNE, MDS
+from matplotlib.animation import FuncAnimation
 
 #%%
-def plot_3d_with_pca(data, colors, elev=30, azim=45, plot=False):
+def pca(data, colors, elev=30, azim=45, plot=False):
     """
     Perform PCA on data and plot the first 3 components in 3D.
     
@@ -18,11 +20,19 @@ def plot_3d_with_pca(data, colors, elev=30, azim=45, plot=False):
     assert len(colors) == len(data), "Number of colors must match number of data points."
     
     # Perform PCA and reduce to 3 components
-    pca = PCA(n_components=data.shape[1])
-    reduced_data = pca.fit_transform(data)
+    if data.shape[1] > 3:
+        pca = PCA(n_components=data.shape[1])
+        reduced_data = pca.fit_transform(data)
+        reduced_data = reduced_data[:, :3]
+    else:
+        reduced_data = data
     
     # Compute cumulative explained variance
     cumulative_explained_variance = np.cumsum(pca.explained_variance_ratio_)
+    
+    # scree plot
+    # get the eigenvalues
+    eigvals = pca.explained_variance_
     
     # Number of original dimensions
     original_dims = data.shape[1]
@@ -39,22 +49,118 @@ def plot_3d_with_pca(data, colors, elev=30, azim=45, plot=False):
         plt.grid(True)
         plt.legend()
         plt.show()
+        
+        # scree plot
+        plt.figure(figsize=(10, 6))
+        plt.plot(range(1, original_dims + 1), eigvals, marker='o', label='Cumulative Explained Variance')
+        #plt.axhline(y=0.95, color='r', linestyle='--', label='95% Explained Variance')  # Optional: 95% threshold line
+        plt.xlabel('Number of Components')
+        plt.ylabel('Eigenvalues')
+        plt.title('PCA Scree Plot')
+        plt.xlim([0, original_dims])
+        plt.grid(True)
+        plt.legend()
+        plt.show()
     
+    return reduced_data
+
+def plot_3d(data, colors, elev=30, azim=45, marker='o', save_dir=None):
     # Create a 3D scatter plot
-    fig = plt.figure()
+    fig = plt.figure(figsize=(6, 6))
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(reduced_data[:, 0], reduced_data[:, 1], reduced_data[:, 2], c=colors)
+    ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=colors, marker=marker, alpha=1, s=50)
     
     # Label the axes
-    ax.set_xlabel('PC1')
-    ax.set_ylabel('PC2')
-    ax.set_zlabel('PC3')
+    ax.set_xlabel('PC1', labelpad=-10, fontsize=25)
+    ax.set_ylabel('PC2', labelpad=-10, fontsize=25)
+    ax.set_zlabel('PC3', labelpad=-10, fontsize=25)
+    
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis._axinfo["grid"].update({"color": "black"})
+    ax.yaxis._axinfo["grid"].update({"color": "black"})
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.set_ticklabels([])
+    ax.axes.get_zaxis().set_visible(True)
+    ax.zaxis._axinfo["grid"].update({"color": "black"})
+    ax.zaxis.pane.set_edgecolor('w')
+    ax.grid(True)
+    ax.xaxis.set_ticklabels([])
+    ax.yaxis.set_ticklabels([])
+    ax.axes.get_xaxis().set_visible(True)
+    ax.axes.get_yaxis().set_visible(True)
+    
     
     # Set the viewing angle
     ax.view_init(elev, azim) 
     
+    #ax.patch.set_alpha(0)
+    
     plt.tight_layout()
     plt.show()
+    
+    if save_dir is not None:
+        fig.savefig(save_dir)
+
+def plot_3d_ovelay(data1, data2, colors1, colors2, name1, name2, elev=30, azim=45, marker1='o', marker2='x', save_dir=None, animation_save_path=None):
+    # Create a 3D scatter plot
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(data1[:, 0], data1[:, 1], data1[:, 2], c=colors1, label=name1, marker=marker1, alpha=1, s=50)
+    ax.scatter(data2[:, 0], data2[:, 1], data2[:, 2], c=colors2, label=name2, marker=marker2, alpha=1, s=50)
+    
+    # Label the axes
+    ax.set_xlabel('PC1', labelpad=-10, fontsize=25)
+    ax.set_ylabel('PC2', labelpad=-10, fontsize=25)
+    ax.set_zlabel('PC3', labelpad=-10, fontsize=25)
+    
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis._axinfo["grid"].update({"color": "black"})
+    ax.yaxis._axinfo["grid"].update({"color": "black"})
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.set_ticklabels([])
+    ax.axes.get_zaxis().set_visible(True)
+    ax.zaxis._axinfo["grid"].update({"color": "black"})
+    ax.zaxis.pane.set_edgecolor('w')
+    ax.grid(True)
+    ax.xaxis.set_ticklabels([])
+    ax.yaxis.set_ticklabels([])
+    ax.axes.get_xaxis().set_visible(True)
+    ax.axes.get_yaxis().set_visible(True)
+    
+    
+    # Set the viewing angle
+    ax.view_init(elev, azim) 
+    
+    # Add a legend
+    ax.legend()
+    # set the font size of the legend
+    plt.setp(ax.get_legend().get_texts(), fontsize='25')
+    
+    # 背景透過
+    ax.patch.set_alpha(0)
+    
+    plt.tight_layout()
+    plt.show()
+    
+    if save_dir is not None:
+        fig.savefig(save_dir)
+    
+    if animation_save_path is not None:
+        # make animation
+        def update(frame):
+            ax.view_init(elev, frame)
+            return fig,
+
+        ani = FuncAnimation(fig, update, frames=np.arange(0, 360, 2), interval=50, blit=True)
+
+        ani.save(animation_save_path, writer='ffmpeg', fps=20)
+    
     
 def plot_3d_tsne(data, colors, elev=30, azim=45):
     """
@@ -82,21 +188,103 @@ def plot_3d_tsne(data, colors, elev=30, azim=45):
     
     plt.show()
 
-#%%
-data = "neutyp"
-emb_dim = 20
-Z = 426
-N_groups = 1
-N_trials = 75
-N_sample = 1
+def procrustes(
+        embedding_target: np.ndarray,
+        embedding_source: np.ndarray,
+        OT: np.ndarray
+    ) -> np.ndarray:
+        """Function that brings embedding_source closest to embedding_target by orthogonal matrix
 
-embedding_pairs = np.load(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        Args:
+            embedding_target (np.ndarray):
+                Target embeddings with shape (n_target, m).
+
+            embedding_source (np.ndarray):
+                Source embeddings with shape (n_source, m).
+
+            OT (np.ndarray):
+                Transportation matrix from source to target with shape (n_source, n_target).
+
+
+        Returns:
+            new_embedding_source (np.ndarray):
+                Transformed source embeddings with shape (n_source, m).
+        """
+        U, S, Vt = np.linalg.svd(np.matmul(embedding_source.T, np.matmul(OT, embedding_target)))
+        Q = np.matmul(U, Vt)
+        new_embedding_source = np.matmul(embedding_source, Q)
+        return new_embedding_source
+
+def MDS_from_RDM(embedding, colors, plot=False):
+    # Compute the distance matrix
+    distance_matrix = np.zeros((embedding.shape[0], embedding.shape[0]))
+    for i in range(embedding.shape[0]):
+        for j in range(embedding.shape[0]):
+            distance_matrix[i, j] = np.linalg.norm(embedding[i] - embedding[j])
+    
+    # Perform MDS
+    mds = MDS(n_components=3, dissimilarity='precomputed')
+    reduced_data = mds.fit_transform(distance_matrix)
+    
+    # Plot
+    if plot:
+        plot_3d(reduced_data, colors)
+    
+    return reduced_data
 
 #%%
-embedding = embedding_pairs[0][0]
-colors = list(np.load('../data/hex_code/original_color_order.npy'))
+for data in ["neutyp", "atyp", "n-a"]:
+    emb_dim = 20
+    Z = 128
+    N_groups = 1
+    N_trials = 75
+    N_sample = 1
+    i = 0
+
+    # Load the embedding
+    file_dir = f"../results/{data}/Z={Z}/seed{i}/"
+    embedding_1 = np.load(file_dir + f"embedding_{data}_0.npy")
+    embedding_2 = np.load(file_dir + f"embedding_{data}_1.npy")
+    OT = np.load(file_dir + f"OT_{data}.npy")
+
+    colors = list(np.load('../data/hex_code/original_color_order.npy'))
+    
+    if data == "neutyp":
+        name1, name2 = "Group T1", "Group T2"
+    elif data == "atyp":
+        name1, name2 = "Group A1", "Group A2"
+    else:
+        name1, name2 = "Group T1", "Group A1"
+
+    # plot
+    reduced_data_1 = pca(embedding_1, colors, plot=True)
+    reduced_data_2 = pca(embedding_2, colors, plot=True,)
+    plot_3d(reduced_data_1, colors, save_dir=os.path.join(file_dir, f"embedding_{data}_0.jpg"))
+    plot_3d(reduced_data_2, colors, marker='s', save_dir=os.path.join(file_dir, f"embedding_{data}_1.jpg"))
+
+
+    # align
+    aligned_embedding_2 = procrustes(reduced_data_1, reduced_data_2, OT)
+    plot_3d_ovelay(
+        reduced_data_1, 
+        aligned_embedding_2[0], 
+        colors, colors, 
+        name1, name2, 
+        marker2='s', 
+        save_dir=os.path.join(file_dir, f"aligned_embedding_{data}.jpg"),
+        animation_save_path=os.path.join(file_dir, f"aligned_embedding_{data}.mp4")
+        )
+
 # %%
-for i in range(18):
-    plot_3d_with_pca(data=embedding, colors=colors, elev=45, azim=i*10)
-#plot_3d_tsne(data=embedding, colors=colors, elev=30, azim=45)
+# load embedding
+# results/embeddings_pairs_list_neutyp_emb=20_Z=426_Ngroups=1_Ntrials=75_Nsample=1.npy
+data = "neutyp"
+Z = 426
+embedding_list = np.load(f"../results/embeddings_pairs_list_{data}_emb=20_Z={Z}_Ngroups=1_Ntrials=75_Nsample=1.npy")
+embedding_1 = embedding_list[0][0]
+reduced_data_1 = pca(embedding_1, colors, plot=True)
+# %%
+# check the dimensionality
+l1_norm = np.linalg.norm(embedding_1, ord=1, axis=0)
+plt.hist(l1_norm, bins=20)
 # %%

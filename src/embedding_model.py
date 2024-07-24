@@ -116,7 +116,7 @@ class ModelTraining():
         if similarity == "pairwise":
             self.compute_similarity = ComputeSimilarityPairwise(distance_metric)
         elif similarity == "triplet":
-            self.compute_similarity = ComputeSimilarityPairwise(distance_metric)
+            self.compute_similarity = ComputeSimilarityTrip(distance_metric)
         
     def run_epoch_computation(self, dataloader, loss_fn, optimizer, lamb = None):
         size = len(dataloader.dataset)

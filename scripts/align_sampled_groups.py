@@ -81,13 +81,18 @@ for Z in Z_list:
                 name_list = ["Group T1", "Group A1"]
                 
             os.makedirs(f"../results/figs/{data}/Z={Z}/seed{i}/", exist_ok=True)
-                
+            # save
+            save_dir = f"../results/{data}/Z={Z}/seed{i}/"
+            os.makedirs(save_dir, exist_ok=True)
+            
             representations = []
             for j, embedding in enumerate(embeddings_pair):
                 representation = Representation(name=f"{data}-{j+1}", embedding=embedding[reorder_idxs, :], metric="euclidean")
                 representations.append(representation)
                 representation.show_embedding(dim=3, visualization_config=vis_emb, legend=None, title=None, fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/", fig_name=f"{data}_seed{i}_{j}_embedings.png")
-
+                # save
+                np.save(os.path.join(save_dir, f"embedding_{data}_{j}.npy"), embedding)
+            
             opt_config = OptimizationConfig(
                                     init_mat_plan="random",
                                     db_params={"drivername": "sqlite"},
@@ -149,6 +154,15 @@ for Z in Z_list:
                         visualization_config=vis_config_OT,
                         fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/"
                         )
+            # save the best ot
+            OT = alignment.gw_alignment(
+                        compute_OT=compute_OT,
+                        delete_results=False,
+                        return_data=True,
+                        return_figure=False,
+                        visualization_config=vis_config_OT,
+                        )
+            np.save(os.path.join(save_dir, f"OT_{data}.npy"), OT)
             
             vis_config_log = VisualizationConfig(
                 figsize=(8, 6), 
@@ -177,6 +191,11 @@ for Z in Z_list:
             
                 
             embedding_aligned = alignment.visualize_embedding(dim=3, visualization_config=vis_emb, fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/", fig_name=f"{data}_Aligned_embedings", name_list=name_list)
+            
+            # get embedding
+            embedding_list = alignment.visualize_embedding(dim=3, returned="row_data")
+            
+            np.save(os.path.join(save_dir, f"embedding_aligned.npy"), embedding_aligned)
             
             # make animation
             #gif_animation(embedding_list=embedding_aligned, markers_list=['o', 'x'], colors=new_color_order, fig_size=(15,12), save_anim=True, save_path=f"../results/figs/{data}/Z={Z}/seed{i}/alignment.gif")

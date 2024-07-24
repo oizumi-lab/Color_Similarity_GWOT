@@ -112,9 +112,9 @@ def RSA(matrix1, matrix2):
 #%%
 # Search for the optimal noise level that produces the desired correlations and accuracies
 n_dimensions = 50
-n_points_per_clusters = [1]#
+n_points_per_clusters = [2]#
 # objective accuracy
-objective_accuracis = [20]#
+objective_accuracis = [40]#
 spread_centers = 10
 
 
@@ -136,7 +136,7 @@ else:
     num_trial = 400 # number of GW epsilon searches
     delete_results = False
     compute_OT = False
-    trial_number = f'_medium_acc_seed{seed_fixed}'
+    trial_number = f'_seed{seed_fixed}'
         
 
 device = "cpu"
@@ -246,9 +246,27 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
             title_size = 0, 
             cmap = "rocket_r",
             cbar_ticks_size=10,
-            # font="Arial",
+            font="Arial",
             # color_labels=colors,
-            color_label_width=3
+            color_label_width=3,
+            xlabel="93 items",
+            ylabel="93 items",
+            xlabel_size=40,
+            ylabel_size=40,
+        )
+        
+        vis_config_ot = VisualizationConfig(
+            figsize=(8, 6), 
+            title_size = 0, 
+            cmap = "rocket_r",
+            cbar_ticks_size=10,
+            font="Arial",
+            # color_labels=colors,
+            color_label_width=3,
+            xlabel="93 items of X",
+            ylabel="93 items of Y",
+            xlabel_size=40,
+            ylabel_size=40,
         )
 
         vis_emb = VisualizationConfig(
@@ -308,7 +326,7 @@ for objective, n_points_per_cluster in zip(objective_accuracis, n_points_per_clu
         alignment.gw_alignment(
             compute_OT=compute_OT,
             delete_results=delete_results,
-            visualization_config=vis_config,
+            visualization_config=vis_config_ot,
             fig_dir=fig_dir
             )
 
