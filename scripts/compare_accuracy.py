@@ -2,6 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 #%%
 plt.style.use('seaborn-v0_8-darkgrid')
@@ -171,6 +172,11 @@ sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', dodge=True, pal
 # Plot chance level
 # for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
 plt.plot([-0.5, 3.5], [100/93, 100/93], color='black', linestyle='dashed', linewidth=2)
+
+# Plot the std of the top-k accuracy
+# for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
+std = np.sqrt(100/93)
+plt.fill_between([-0.5, 3.5], [100/93 - std, 100/93 - std], [100/93 + std, 100/93 + std], color='black', alpha=0.2)
     
 labels = ["1200\n(Z=16)", "2400\n(Z=32)", "4800\n(Z=64)", "9600\n(Z=128)"]
 # Customize ticks and labels
@@ -263,6 +269,7 @@ df_filtered = df_OT_top_k_all[df_OT_top_k_all['Z'] == 128]  # Filtering only for
 
 conditions = ['T v.s. T', 'A v.s. A', 'T v.s. A']  # The conditions you want to plot
 
+
 for condition in conditions:
     plt.figure(figsize=(6, 6))
 
@@ -276,6 +283,17 @@ for condition in conditions:
     plt.plot([-0.7, 0.5], [100/93, 100/93], color='black', linestyle='dashed', linewidth=2)
     plt.plot([0.5, 1.5], [300/93, 300/93], color='black', linestyle='dashed', linewidth=2)
     plt.plot([1.5, 2.5], [500/93, 500/93], color='black', linestyle='dashed', linewidth=2)
+    
+    # plot the std of the top-k accuracy
+    # for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
+    std = np.sqrt(100/93)
+    plt.fill_between([-0.7, 0.5], [100/93 - std, 100/93 - std], [100/93 + std, 100/93 + std], color='black', alpha=0.2)
+    
+    std = np.sqrt(300/93)
+    plt.fill_between([0.5, 1.5], [300/93 - std, 300/93 - std], [300/93 + std, 300/93 + std], color='black', alpha=0.2)
+    
+    std = np.sqrt(500/93)
+    plt.fill_between([1.5, 2.5], [500/93 - std, 500/93 - std], [500/93 + std, 500/93 + std], color='black', alpha=0.2)
     
     #plt.title(f'Top-1, 3, 5 Matching Rates for {condition} at Z=128')
     plt.xlabel('Top-k', size=35)
