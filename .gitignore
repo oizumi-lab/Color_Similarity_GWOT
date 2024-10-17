@@ -6,3 +6,4 @@ __pycache__/
 *.iqdat
 GW_methods
 *.out
+*.zip

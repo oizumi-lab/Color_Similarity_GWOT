@@ -158,13 +158,13 @@ if __name__ == "__main__":
     N_groups_N = 2
     N_groups_A = 2
     for Z in Z_list:
-        embeddings_pairs_list_N = np.load(f"../results/embeddings_pairs_list_neutyp_emb={emb_dim}_Z={Z}_Ngroups={N_groups_N}_Ntrials={N_trials}_Nsample={N_sample}.npy")
-        embeddings_pairs_list_A = np.load(f"../results/embeddings_pairs_list_atyp_emb={emb_dim}_Z={Z}_Ngroups={N_groups_A}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list_N = np.load(f"../results_public/embeddings_pairs_list_neutyp_emb={emb_dim}_Z={Z}_Ngroups={N_groups_N}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list_A = np.load(f"../results_public/embeddings_pairs_list_atyp_emb={emb_dim}_Z={Z}_Ngroups={N_groups_A}_Ntrials={N_trials}_Nsample={N_sample}.npy")
 
         embeddings_pairs_list = []
         for i in range(N_sample):
             embeddings_pair = [embeddings_pairs_list_N[i][0], embeddings_pairs_list_A[i][0]]
             embeddings_pairs_list.append(embeddings_pair)
 
-        np.save(f"../results/embeddings_pairs_list_n-a_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+        np.save(f"../results_public/embeddings_pairs_list_n-a_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
 # %%

@@ -48,7 +48,7 @@ reorder_idxs = get_reorder_idxs(old_color_order,new_color_order)
 for Z in Z_list:
     for data, N_groups in zip(data_list, N_groups_list):  
         #embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy")
-        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}{'_independent' if data=='n-a' else ''}.npy")
+        embeddings_pairs_list = np.load(f"../results_public/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}{'_independent' if data=='n-a' else ''}.npy")
         
         ### set accuracy dataframe
         top_k_list = [1, 3, 5]
