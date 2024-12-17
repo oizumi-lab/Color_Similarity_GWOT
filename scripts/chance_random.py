@@ -81,3 +81,19 @@ print(result_df.groupby("Top-k").agg(["mean", "std"]))
 print(result_df.groupby("Top-k").agg(["mean", "std"])["Accuracy"]["std"] ** 2)
 
 # %%
+# Calculate the confidence interval from the raw histogram data
+confidence_interval_df = pd.DataFrame(columns=["Top-k", "Mean", "Std", "CI Lower", "CI Upper"])
+
+for topk in topk_list:
+    mean = result_df[result_df["Top-k"] == topk]["Accuracy"].mean()
+    std = result_df[result_df["Top-k"] == topk]["Accuracy"].std()
+    
+    ci_lower = result_df[result_df["Top-k"] == topk]["Accuracy"].quantile(0.025)
+    ci_upper = result_df[result_df["Top-k"] == topk]["Accuracy"].quantile(0.975)
+    
+    result = {"Top-k": topk, "Mean": mean, "Std": std, "CI Lower": ci_lower, "CI Upper": ci_upper}
+    confidence_interval_df = pd.concat([confidence_interval_df, pd.DataFrame([result])])
+
+print(confidence_interval_df)
+confidence_interval_df.to_csv("../results/confidence_interval.csv", index=False)
+# %%

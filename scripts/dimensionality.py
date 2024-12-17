@@ -27,9 +27,6 @@ def split_lists(list, n_groups):
 #%%
 if __name__ == "__main__": 
     ### set parameters
-    
-    compute_embeddings = False
-    
     # device 
     device = "cuda:3" if torch.cuda.is_available() else "cpu"
 
@@ -54,10 +51,10 @@ if __name__ == "__main__":
     data_list = ["neutyp"]#, "neutyp", "atyp"'n-a'
     N_trials = 75
     
-    Z_list = [426] # number of participants per group #[10, 50, 100]128, 
-    N_groups = 1 # fix
+    Z_list = [128] # number of participants per group #[10, 50, 100]128, 
+    N_groups = 2 # fix
     
-    N_sample = 1 # number of sampling
+    N_sample = 20 # number of sampling
     seed_list = range(N_sample)
     
     #%%
@@ -130,34 +127,32 @@ if __name__ == "__main__":
                                  early_stopping=early_stopping,
                                  distance_metric="euclidean")
 
-                    if compute_embeddings:
-                        cv.optimize(n_trials=cv_n_trial)
+                    cv.optimize(n_trials=cv_n_trial)
                     lamb = cv.get_best_lamb(show_log=True)
-                    print(lamb)
+                    #print(lamb)
                     #lamb = None
                     
                     ### main
-                    if compute_embeddings:
-                        main_training = MainTraining(dataset = dataset(N_trials=N_trials), 
-                                                test_size = 1/n_splits, 
-                                                batch_size = batch_size, 
-                                                device = device)
-                        
-                        color_embeddings, loss = main_training.main_compute(loss_fn = loss_fn, 
-                                            emb_dim = emb_dim, 
-                                            object_num = color_num, 
-                                            n_epoch = num_epochs, 
-                                            lr = lr, 
-                                            early_stopping=early_stopping,
-                                            distance_metric = "euclidean", 
-                                            lamb=lamb)
-                        
-                        embeddings_pair.append(color_embeddings)
-            
-                    embeddings_pairs_list.append(embeddings_pair)
+                    main_training = MainTraining(dataset = dataset(N_trials=N_trials), 
+                                             test_size = 1/n_splits, 
+                                             batch_size = batch_size, 
+                                             device = device)
                     
-                #np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
-                np.save(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}{'_independent' if data=='n-a' else ''}.npy", embeddings_pairs_list)
+                    color_embeddings, loss = main_training.main_compute(loss_fn = loss_fn, 
+                                           emb_dim = emb_dim, 
+                                           object_num = color_num, 
+                                           n_epoch = num_epochs, 
+                                           lr = lr, 
+                                           early_stopping=early_stopping,
+                                           distance_metric = "euclidean", 
+                                           lamb=lamb)
+                    
+                    embeddings_pair.append(color_embeddings)
+        
+                embeddings_pairs_list.append(embeddings_pair)
+                
+            #np.save(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy", embeddings_pairs_list)
+            np.save(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}{'_independent' if data=='n-a' else ''}.npy", embeddings_pairs_list)
     #%%
     ### set n-a embedding pairs
     N_groups_N = 2

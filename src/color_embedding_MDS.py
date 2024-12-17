@@ -144,12 +144,12 @@ class MainTraining():
         return train_dataset, valid_dataset
     
     def make_dataloader(self):
-        train_dataloader = DataLoader(self.train_dataset, self.batch_size, shuffle = True)
-        valid_dataloader = DataLoader(self.valid_dataset, self.batch_size, shuffle = False)
+        train_dataloader = DataLoader(self.train_dataset, self.batch_size, shuffle = True, worker_init_fn=np.random.seed(0))
+        valid_dataloader = DataLoader(self.valid_dataset, self.batch_size, shuffle = False, worker_init_fn=np.random.seed(0))
         
         return train_dataloader, valid_dataloader
     
-    def main_compute(self, loss_fn, emb_dim, object_num, n_epoch, lr, early_stopping=False, distance_metric = "euclidean", lamb = None):
+    def main_compute(self, loss_fn, emb_dim, object_num, n_epoch, lr, early_stopping=False, distance_metric = "euclidean", lamb = None, show_log=False):
         train_dataloader, valid_dataloader = self.make_dataloader()
         
         model = EmbeddingModel(emb_dim = emb_dim, object_num = object_num).to(self.device)
@@ -166,7 +166,7 @@ class MainTraining():
                                                 num_epochs=n_epoch, 
                                                 early_stopping=early_stopping,
                                                 lamb=lamb, 
-                                                show_log=True)
+                                                show_log=show_log)
         
         weights = model.state_dict()["Embedding.weight"].to('cpu').detach().numpy().copy()
         

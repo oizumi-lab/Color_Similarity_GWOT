@@ -127,6 +127,13 @@ df_OT_top_k_means_all.to_csv(f"../results/accuracy_OT_top_k_means.csv")
 df_k_nearest_means_all.to_csv(f"../results/accuracy_k_nearest_means.csv")
 
 # %%
+
+# load confidence interval data
+confidence_interval = pd.read_csv("../results/confidence_interval.csv")
+
+ci_lower_list = confidence_interval["CI Lower"].values
+ci_upper_list = confidence_interval["CI Upper"].values
+
 # CSVファイルを読み込む
 df = df_OT_top_k_all #df_k_nearest_all df_OT_top_k_all
 
@@ -176,7 +183,8 @@ plt.plot([-0.5, 3.5], [100/93, 100/93], color='black', linestyle='dashed', linew
 # Plot the std of the top-k accuracy
 # for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
 std = np.sqrt(100/93)
-plt.fill_between([-0.5, 3.5], [100/93 - std, 100/93 - std], [100/93 + std, 100/93 + std], color='black', alpha=0.2)
+plt.fill_between([-0.5, 3.5], [ci_lower_list[0], ci_lower_list[0]], [ci_upper_list[0], ci_upper_list[0]], color='black', alpha=0.2)
+ 
     
 labels = ["1200\n(Z=16)", "2400\n(Z=32)", "4800\n(Z=64)", "9600\n(Z=128)"]
 # Customize ticks and labels
@@ -287,13 +295,13 @@ for condition in conditions:
     # plot the std of the top-k accuracy
     # for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
     std = np.sqrt(100/93)
-    plt.fill_between([-0.7, 0.5], [100/93 - std, 100/93 - std], [100/93 + std, 100/93 + std], color='black', alpha=0.2)
+    plt.fill_between([-0.7, 0.5], [ci_lower_list[0], ci_lower_list[0]], [ci_upper_list[0], ci_upper_list[0]], color='black', alpha=0.2)
     
     std = np.sqrt(300/93)
-    plt.fill_between([0.5, 1.5], [300/93 - std, 300/93 - std], [300/93 + std, 300/93 + std], color='black', alpha=0.2)
+    plt.fill_between([0.5, 1.5], [ci_lower_list[1], ci_lower_list[1]], [ci_upper_list[1], ci_upper_list[1]], color='black', alpha=0.2)
     
     std = np.sqrt(500/93)
-    plt.fill_between([1.5, 2.5], [500/93 - std, 500/93 - std], [500/93 + std, 500/93 + std], color='black', alpha=0.2)
+    plt.fill_between([1.5, 2.5], [ci_lower_list[2], ci_lower_list[2]], [ci_upper_list[2], ci_upper_list[2]], color='black', alpha=0.2)
     
     #plt.title(f'Top-1, 3, 5 Matching Rates for {condition} at Z=128')
     plt.xlabel('Top-k', size=35)
