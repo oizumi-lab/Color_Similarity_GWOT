@@ -149,10 +149,10 @@ class MainTraining():
         
         return train_dataloader, valid_dataloader
     
-    def main_compute(self, loss_fn, emb_dim, object_num, n_epoch, lr, early_stopping=False, distance_metric = "euclidean", lamb = None, show_log=False):
+    def main_compute(self, loss_fn, emb_dim, object_num, n_epoch, lr, early_stopping=False, distance_metric = "euclidean", lamb = None, show_log=False, mapper=None):
         train_dataloader, valid_dataloader = self.make_dataloader()
         
-        model = EmbeddingModel(emb_dim = emb_dim, object_num = object_num).to(self.device)
+        model = EmbeddingModel(emb_dim = emb_dim, object_num = object_num, mapper=mapper).to(self.device)
         
         model_training = ModelTraining(self.device, 
                                        model = model, 

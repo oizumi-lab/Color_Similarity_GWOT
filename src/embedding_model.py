@@ -1,3 +1,4 @@
+import torch.backends
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.model_selection import KFold, cross_validate
@@ -19,7 +20,8 @@ def torch_fix_seed(seed=42):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = False
-    torch.use_deterministic_algorithms = False
+    torch.use_deterministic_algorithms = True
+    torch.backends.cudnn.benchmark = False
     
     
 class ComputeSimilarityTrip:
@@ -81,11 +83,12 @@ class ComputeSimilarityPairwise:
     
     
 class EmbeddingModel(nn.Module):
-    def __init__(self, emb_dim, object_num, init_fix = True):
+    def __init__(self, emb_dim, object_num, init_fix = True, mapper = None):
         if init_fix:
             torch_fix_seed()
         super(EmbeddingModel, self).__init__()
         self.Embedding = nn.Embedding(object_num, emb_dim) 
+        self.mapper = mapper
         self.apply(self._init_weights)
         
     def _init_weights(self, module):
@@ -94,11 +97,17 @@ class EmbeddingModel(nn.Module):
             module.weight.data.normal_(mean=1.0, std=0.1)
             if module.padding_idx is not None:
                 module.weight.data[module.padding_idx].zero_()
+            # use mapper to initialize the weights
+            if self.mapper is not None:
+                module.weight.data = module.weight.data[self.mapper]
 
         if isinstance(module, nn.Linear):
             module.weight.data.normal_(mean=0.0, std=1.0)
             if module.bias is not None:
                 module.bias.data.zero_()
+            # use mapper to initialize the weights
+            if self.mapper is not None:
+                module.weight.data = module.weight.data[self.mapper]
 
     def forward(self, x : torch.Tensor):
         x = self.Embedding(x)
@@ -150,7 +159,7 @@ class ModelTraining():
     
     def main_compute(self, loss_fn, lr, num_epochs, early_stopping=True, lamb = None, show_log = True):
         #loss_fn = nn.CrossEntropyLoss(reduction = "sum")
-        optimizer = torch.optim.Adam(self.model.parameters(), lr = lr)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr = lr, amsgrad=True)
         
         training_loss = list()
         testing_loss = list()
