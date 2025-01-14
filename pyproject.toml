@@ -9,7 +9,7 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
 cython = "*"
-numpy = "*"
+numpy = "<2.0.0"
 matplotlib = ">=3.6, <3.8.0"
 pandas = "^1.5.0"
 scikit-learn = "*"

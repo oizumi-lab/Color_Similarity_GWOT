@@ -26,10 +26,10 @@ import ot
 from sklearn.metrics import pairwise_distances
 
 from src.embedding_model import EmbeddingModel, ModelTraining
-from GW_methods.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
+from GWTune.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
 
 #%%
-compute_OT = False
+compute_OT = True
 
 data_list = ["neutyp", "atyp", "n-a"]# "neutyp" : n-n, "atyp" : a-a, 
 N_groups_list = [2, 2, 2] # number of groups for each data type4, , 2, 2
@@ -149,7 +149,7 @@ for Z in Z_list:
             
             alignment.gw_alignment(
                         compute_OT=compute_OT,
-                        delete_results=False,
+                        delete_results=True,
                         visualization_config=vis_config_OT,
                         fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/"
                         )
@@ -189,7 +189,7 @@ for Z in Z_list:
                 )
             
                 
-            embedding_aligned = alignment.visualize_embedding(dim=3, visualization_config=vis_emb, fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/", fig_name=f"{data}_Aligned_embedings", name_list=name_list)
+            embedding_aligned = alignment.visualize_embedding(dim=3, visualization_config=vis_emb, fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/", fig_name=f"{data}_Aligned_embedings")
             
             # get embedding
             embedding_list = alignment.visualize_embedding(dim=3, returned="row_data")
