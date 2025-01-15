@@ -1,8 +1,4 @@
-"""
-Make Fig. 3
 
-Genji Kawakita
-"""
 # %%
 import os
 import numpy as np
