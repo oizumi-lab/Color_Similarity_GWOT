@@ -7,7 +7,7 @@ import os
 #%%
 plt.style.use('seaborn-v0_8-darkgrid')
 data_list = ["neutyp","atyp","n-a"] #
-Z_list = [16,32,64,128] # 
+Z_list = [16,32,64,128] #
 N_sample = 20 # number of sampling
 N_trials = 75
 N_seed = 20
@@ -19,47 +19,9 @@ for j, data in enumerate(data_list):
         min_gwds = []
         df_temp = pd.DataFrame()
         for s in range(N_seed):
-            gw_path = f"../results/gw_alignment/color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}/color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}_{data}-1_vs_{data}-2/random"
+            gw_path = f"../results/gw_alignment/color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}{'_independent' if data=='n-a' else ''}_{data}-1_vs_{data}-2/random"
             # load .db file
-            db_file = os.path.join(gw_path,f"color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}_{data}-1_vs_{data}-2_random.db")
-            # connect to db
-            conn = sqlite3.connect(db_file)
-            # display tables
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM trial_values;")
-            studies = cursor.fetchall()
-            # find the best OT (minimum GW distance studies[i][3])
-            min_gwd= 100
-            best_OT_idx = 0
-            for i in range(len(studies)):
-                if studies[i][3] < min_gwd:
-                    min_gwd = studies[i][3]
-            min_gwds.append(min_gwd)
-        df_temp["min_gwd"] = min_gwds
-        df_temp["Z"] = [Z] * len(min_gwds)
-        df_temp["data"] = [data] * len(min_gwds)
-        df = pd.concat([df, df_temp])
-            
-name_mapping = {
-    'neutyp': 'T v.s. T',
-    'atyp': 'A v.s. A',
-    'n-a': 'T v.s. A'
-}
-df['data'] = df['data'].replace(name_mapping)
-
-
-#%% Correlation plot 
-
-#%%
-df = pd.DataFrame()
-for j, data in enumerate(data_list):
-    for i, Z in enumerate(Z_list):
-        min_gwds = []
-        df_temp = pd.DataFrame()
-        for s in range(N_seed):
-            gw_path = f"../results/gw_alignment/color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}/color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}_{data}-1_vs_{data}-2/random"
-            # load .db file
-            db_file = os.path.join(gw_path,f"color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}_{data}-1_vs_{data}-2_random.db")
+            db_file = os.path.join(gw_path,f"color_{data}_Z={Z}_Ntrials={N_trials}_seed{s}{'_independent' if data=='n-a' else ''}_{data}-1_vs_{data}-2_random.db")
             # connect to db
             conn = sqlite3.connect(db_file)
             # display tables

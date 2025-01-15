@@ -26,15 +26,16 @@ import ot
 from sklearn.metrics import pairwise_distances
 
 from src.embedding_model import EmbeddingModel, ModelTraining
-from GW_methods.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
+from GWTune.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
 from src.utils.plot_utils import plot_MDS_embedding
 
 # %% Load data
 data_list = ["neutyp", "atyp", "n-a"]# "neutyp" : n-n, "atyp" : a-a
 N_groups_list = [2, 2, 2] # number of groups for each data type4, 
-Z_list = [16,32,64,128]# 20, 60, # number of participants
+Z_list = [128]# 20, 60, # number of participants  16,32,64,
 N_sample = 20  # number of sampling
 N_trials = 75
+emb_dim = 20
 # load color codes
 old_color_order = list(np.load('../data/hex_code/original_color_order.npy'))
 new_color_order = list(np.load('../data/hex_code/new_color_order.npy'))
@@ -47,7 +48,7 @@ for idx in range(len(data_list)):
     N_groups = N_groups_list[idx]
     for Z in Z_list:
 
-        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}.npy")
+        embeddings_pairs_list = np.load(f"../results/embeddings_pairs_list_{data}_emb={emb_dim}_Z={Z}_Ngroups={N_groups}_Ntrials={N_trials}_Nsample={N_sample}{'_independent' if data=='n-a' else ''}.npy")
         sim_mat_list = []
         corr_list = []
         for i, embeddings_pair in enumerate(embeddings_pairs_list):

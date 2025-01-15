@@ -6,7 +6,7 @@ import ot
 import pandas as pd
 from tqdm import tqdm
 
-from GW_methods.src.utils.init_matrix import InitMatrix
+from GWTune.src.utils.init_matrix import InitMatrix
 
 #%%
 def calc_accuracy_with_topk_diagonal(matrix, k, order="maximum", category_mat=None):

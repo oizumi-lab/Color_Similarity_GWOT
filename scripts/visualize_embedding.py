@@ -142,7 +142,6 @@ def plot_3d_ovelay(data1, data2, colors1, colors2, name1, name2, elev=30, azim=4
     # set the font size of the legend
     plt.setp(ax.get_legend().get_texts(), fontsize='25')
     
-    # 背景透過
     ax.patch.set_alpha(0)
     
     plt.tight_layout()
@@ -275,16 +274,4 @@ for data in ["neutyp", "atyp", "n-a"]:
         animation_save_path=os.path.join(file_dir, f"aligned_embedding_{data}.mp4")
         )
 
-# %%
-# load embedding
-# results/embeddings_pairs_list_neutyp_emb=20_Z=426_Ngroups=1_Ntrials=75_Nsample=1.npy
-data = "neutyp"
-Z = 426
-embedding_list = np.load(f"../results/embeddings_pairs_list_{data}_emb=20_Z={Z}_Ngroups=1_Ntrials=75_Nsample=1.npy")
-embedding_1 = embedding_list[0][0]
-reduced_data_1 = pca(embedding_1, colors, plot=True)
-# %%
-# check the dimensionality
-l1_norm = np.linalg.norm(embedding_1, ord=1, axis=0)
-plt.hist(l1_norm, bins=20)
 # %%

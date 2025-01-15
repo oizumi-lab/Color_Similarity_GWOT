@@ -29,7 +29,6 @@ import ot
 from sklearn.metrics import pairwise_distances
 
 from src.embedding_model import EmbeddingModel, ModelTraining
-from GW_methods.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
 
 #%%
 

@@ -8,7 +8,7 @@ import numpy as np
 plt.style.use('seaborn-v0_8-darkgrid')
 
 data_list = ["neutyp","atyp","n-a"]#
-Z_list = [16,32,64,128]#
+Z_list = [128]#16,32,64,
 N_sample = 20 # number of sampling
 top_k_list = [1,3,5]
 N_trials = 75
@@ -156,36 +156,20 @@ ave_NA = df_Z128_NA['accuracy'].mean()
 
 print(f"ave_NN={ave_NN}, ave_AA={ave_AA}, ave_NA={ave_NA}")
 
-# データを整形する
-#df_pivot = df_filtered.pivot(index='Z', columns='data', values='mean')
-#df_std = df_filtered.pivot(index='Z', columns='data', values='std')
-
-# 色のパレットを設定する
 palette = sns.color_palette("bright", n_colors=6)
 # reverse the order of the palette
 palette = palette[::-1]
 
-# エラーバー付きのプロットを作成する
 plt.figure(figsize=(6, 6))
-#sns.lineplot(data=df_pivot, markers=True, err_style='bars', ci='sd', linewidth=2)
-#
-#for i, col in enumerate(df_pivot.columns):
-#    plt.errorbar(df_pivot.index, df_pivot[col], yerr=df_std[col], fmt='o', capsize=4, color=palette[i], alpha=0.5)
-# make swarm plot but different columns for N-N, A-A, N-A
-#sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', palette='bright', size=10)
-# Create a swarmplot with dodging
 sns.swarmplot(data=df_filtered, x='Z', y='accuracy', hue='data', dodge=True, palette=palette, size=3)
 
 # Plot chance level
-# for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
 plt.plot([-0.5, 3.5], [100/93, 100/93], color='black', linestyle='dashed', linewidth=2)
 
 # Plot the std of the top-k accuracy
-# for k=1, 100/93, for k=3, 300/93, for k=5, 500/93
 std = np.sqrt(100/93)
 plt.fill_between([-0.5, 3.5], [ci_lower_list[0], ci_lower_list[0]], [ci_upper_list[0], ci_upper_list[0]], color='black', alpha=0.2)
- 
-    
+
 labels = ["1200\n(Z=16)", "2400\n(Z=32)", "4800\n(Z=64)", "9600\n(Z=128)"]
 # Customize ticks and labels
 plt.xticks(ticks=[0, 1, 2, 3], labels=labels)
@@ -196,13 +180,9 @@ plt.legend(title='Condition')
 #plt.xticks(ticks=Z_list, labels=labels, size=25)
 plt.xticks(size=15)
 plt.yticks(size=15)
-
-# 凡例を表示する
 plt.legend(fontsize=15, loc='upper left')
 plt.tight_layout()
 plt.savefig(f"../results/figs/accuracy_swarm_sampled_groups_k={top_k}.png")
-
-# グラフを表示する
 plt.show()
 
 # %% swarm plot for GW distance
@@ -212,28 +192,17 @@ plt.show()
 
 
 # %% line plot with error bar as shaded area
-# 色のパレットを設定する
 palette = sns.color_palette("bright", n_colors=len(labels))
 
-# エラーバー付きのプロットを作成する
 plt.figure(figsize=(10, 6))
-
 sns.lineplot(data=df_filtered, x='Z', y='accuracy', hue='data', palette='bright', err_style="band", errorbar='sd', linewidth=2)
-
-
-
-# グラフの装飾
 plt.xlabel('Color combinations', size=25)
 plt.ylabel(f'top{top_k} accuracy', size=25)
 #plt.xticks(ticks=Z_list, labels=labels, size=25)
 plt.yticks(size=25)
-
-# 凡例を表示する
 plt.legend(title='data', fontsize=15, loc='upper left')
 plt.tight_layout()
 plt.savefig(f"../results/figs/accuracy_sampled_groups_k={top_k}_line_plot.png")
-
-# グラフを表示する
 plt.show()
 # %%
 
