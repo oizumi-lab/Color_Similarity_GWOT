@@ -5,3 +5,4 @@
 1. Run MDS_sampled_groups.py for estimating embeddings.
 2. Run align_sampled_groups.py for conducting GWOT. 
 3. Run compare_accuracy.py for plotting the matching rates.
+4. Run visualize_embedding.py for visualizing embeddings.
