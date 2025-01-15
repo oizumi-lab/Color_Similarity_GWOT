@@ -149,13 +149,13 @@ for Z in Z_list:
             
             alignment.gw_alignment(
                         compute_OT=compute_OT,
-                        delete_results=True,
+                        delete_results=False,
                         visualization_config=vis_config_OT,
                         fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/"
                         )
             # save the best ot
             OT = alignment.gw_alignment(
-                        compute_OT=compute_OT,
+                        compute_OT=False,
                         delete_results=False,
                         return_data=True,
                         return_figure=False,
