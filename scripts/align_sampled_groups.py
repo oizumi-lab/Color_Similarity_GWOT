@@ -29,7 +29,7 @@ from src.embedding_model import EmbeddingModel, ModelTraining
 from GWTune.src.align_representations import Representation, VisualizationConfig, AlignRepresentations, OptimizationConfig
 
 #%%
-compute_OT = True
+compute_OT = False
 
 data_list = ["neutyp", "atyp", "n-a"]# "neutyp" : n-n, "atyp" : a-a, 
 N_groups_list = [2, 2, 2] # number of groups for each data type4, , 2, 2
@@ -64,12 +64,13 @@ for Z in Z_list:
             
             vis_emb = VisualizationConfig(
                 figsize=(8, 8), 
-                fig_ext="svg",
+                fig_ext="png",
                 legend_size=12,
                 marker_size=60,
                 color_labels=new_color_order,
                 font = "Arial",
-                title_size = 50
+                title_size = 50,
+                transparent=True,
                 )
             
             if data == "neutyp":
@@ -88,7 +89,7 @@ for Z in Z_list:
             for j, embedding in enumerate(embeddings_pair):
                 representation = Representation(name=f"{data}-{j+1}", embedding=embedding[reorder_idxs, :], metric="euclidean")
                 representations.append(representation)
-                representation.show_embedding(dim=3, visualization_config=vis_emb, legend=None, title=None, fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/", fig_name=f"{data}_seed{i}_{j}_embedings.png")
+                representation.show_embedding(dim=3, visualization_config=vis_emb, legend=None, title=None, fig_dir=f"../results/figs/{data}/Z={Z}/seed{i}/", fig_name=f"{data}_seed{i}_{j}_embedings")
                 # save
                 np.save(os.path.join(save_dir, f"embedding_{data}_{j}.npy"), embedding)
             
@@ -120,6 +121,7 @@ for Z in Z_list:
                 cbar_label_size=40,
                 color_labels = new_color_order,
                 color_label_width = 5,
+                transparent=True,
                 )
             
             alignment.show_sim_mat(

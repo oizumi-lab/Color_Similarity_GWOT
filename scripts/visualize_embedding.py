@@ -78,19 +78,19 @@ def plot_3d(data, colors, elev=30, azim=45, marker='o', save_dir=None):
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
-    ax.xaxis._axinfo["grid"].update({"color": "black"})
-    ax.yaxis._axinfo["grid"].update({"color": "black"})
+    ax.xaxis._axinfo["grid"].update({"color": "black", "linewidth": 0.5, "alpha": 0.3})
+    ax.yaxis._axinfo["grid"].update({"color": "black", "linewidth": 0.5, "alpha": 0.3})
+    ax.zaxis._axinfo["grid"].update({"color": "black", "linewidth": 0.5, "alpha": 0.3})
+    ax.grid(True, color='black', linewidth=0.5, alpha=0.3)
     ax.xaxis.pane.set_edgecolor('w')
     ax.yaxis.pane.set_edgecolor('w')
-    ax.zaxis.set_ticklabels([])
-    ax.axes.get_zaxis().set_visible(True)
-    ax.zaxis._axinfo["grid"].update({"color": "black"})
     ax.zaxis.pane.set_edgecolor('w')
-    ax.grid(True)
     ax.xaxis.set_ticklabels([])
     ax.yaxis.set_ticklabels([])
+    ax.zaxis.set_ticklabels([])
     ax.axes.get_xaxis().set_visible(True)
     ax.axes.get_yaxis().set_visible(True)
+    ax.axes.get_zaxis().set_visible(True)
     
     
     # Set the viewing angle
@@ -102,7 +102,7 @@ def plot_3d(data, colors, elev=30, azim=45, marker='o', save_dir=None):
     plt.show()
     
     if save_dir is not None:
-        fig.savefig(save_dir)
+        fig.savefig(save_dir, transparent=True)
 
 def plot_3d_ovelay(data1, data2, colors1, colors2, name1, name2, elev=30, azim=45, marker1='o', marker2='x', save_dir=None, animation_save_path=None):
     # Create a 3D scatter plot
@@ -119,19 +119,19 @@ def plot_3d_ovelay(data1, data2, colors1, colors2, name1, name2, elev=30, azim=4
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
-    ax.xaxis._axinfo["grid"].update({"color": "black"})
-    ax.yaxis._axinfo["grid"].update({"color": "black"})
+    ax.xaxis._axinfo["grid"].update({"color": "black", "linewidth": 0.5, "alpha": 0.3})
+    ax.yaxis._axinfo["grid"].update({"color": "black", "linewidth": 0.5, "alpha": 0.3})
+    ax.zaxis._axinfo["grid"].update({"color": "black", "linewidth": 0.5, "alpha": 0.3})
+    ax.grid(True, color='black', linewidth=0.5, alpha=0.3)
     ax.xaxis.pane.set_edgecolor('w')
     ax.yaxis.pane.set_edgecolor('w')
-    ax.zaxis.set_ticklabels([])
-    ax.axes.get_zaxis().set_visible(True)
-    ax.zaxis._axinfo["grid"].update({"color": "black"})
     ax.zaxis.pane.set_edgecolor('w')
-    ax.grid(True)
     ax.xaxis.set_ticklabels([])
     ax.yaxis.set_ticklabels([])
+    ax.zaxis.set_ticklabels([])
     ax.axes.get_xaxis().set_visible(True)
     ax.axes.get_yaxis().set_visible(True)
+    ax.axes.get_zaxis().set_visible(True)
     
     
     # Set the viewing angle
@@ -148,7 +148,7 @@ def plot_3d_ovelay(data1, data2, colors1, colors2, name1, name2, elev=30, azim=4
     plt.show()
     
     if save_dir is not None:
-        fig.savefig(save_dir)
+        fig.savefig(save_dir, transparent=True)
     
     if animation_save_path is not None:
         # make animation
@@ -258,8 +258,8 @@ for data in ["neutyp", "atyp", "n-a"]:
     # plot
     reduced_data_1 = pca(embedding_1, colors, plot=True)
     reduced_data_2 = pca(embedding_2, colors, plot=True,)
-    plot_3d(reduced_data_1, colors, save_dir=os.path.join(file_dir, f"embedding_{data}_0.jpg"))
-    plot_3d(reduced_data_2, colors, marker='s', save_dir=os.path.join(file_dir, f"embedding_{data}_1.jpg"))
+    plot_3d(reduced_data_1, colors, save_dir=os.path.join(file_dir, f"embedding_{data}_0.png"))
+    plot_3d(reduced_data_2, colors, marker='s', save_dir=os.path.join(file_dir, f"embedding_{data}_1.png"))
 
 
     # align
@@ -270,7 +270,7 @@ for data in ["neutyp", "atyp", "n-a"]:
         colors, colors, 
         name1, name2, 
         marker2='s', 
-        save_dir=os.path.join(file_dir, f"aligned_embedding_{data}.jpg"),
+        save_dir=os.path.join(file_dir, f"aligned_embedding_{data}.png"),
         animation_save_path=os.path.join(file_dir, f"aligned_embedding_{data}.mp4")
         )
 
